@@ -1,0 +1,3155 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EstadísticaQuest · Aventura estadística</title>
+<style>
+:root{
+  --bg1:#eef2ff; --bg2:#f0fdfa; --bg3:#fefce8;
+  --card:#ffffff; --texto:#1e293b; --texto-suave:#64748b;
+  --borde:#e2e8f0; --acento:#4338ca; --acento2:#0ea5e9;
+  --ok:#16a34a; --error:#dc2626;
+  --input-bg:#ffffff; --input-borde:#cbd5e1;
+  --tabla-alt:#f8fafc; --tabla-head:#f1f5f9;
+  --sombra:0 6px 22px rgba(15,23,42,.07);
+}
+body.oscuro{
+  --bg1:#0f172a; --bg2:#1e1b4b; --bg3:#0f172a;
+  --card:#1e293b; --texto:#f1f5f9; --texto-suave:#94a3b8;
+  --borde:#334155; --acento:#818cf8; --acento2:#38bdf8;
+  --input-bg:#334155; --input-borde:#475569;
+  --tabla-alt:#1a2536; --tabla-head:#273449;
+  --sombra:0 6px 22px rgba(0,0,0,.4);
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family:'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+  background-attachment:fixed;
+  color:var(--texto); min-height:100vh;
+  transition:background .4s,color .4s;
+}
+button{ font-family:inherit; }
+input{ font-family:inherit; }
+
+header{
+  background:linear-gradient(120deg,#4338ca,#0ea5e9);
+  color:#fff; padding:12px 20px;
+  box-shadow:0 6px 24px rgba(67,56,202,.28);
+  position:sticky; top:0; z-index:50;
+}
+.header-inner{
+  max-width:1200px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap;
+}
+.logo{ display:flex; align-items:center; gap:10px; }
+.logo-icon{ font-size:1.8rem; line-height:1; }
+.logo h1{ margin:0; font-size:1.15rem; letter-spacing:.3px; }
+.logo p{ margin:2px 0 0; font-size:.75rem; opacity:.85; }
+.header-botones{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.header-botones .pill{
+  background:rgba(255,255,255,.18); color:#fff;
+  padding:6px 12px; border-radius:20px;
+  font-size:.8rem; font-weight:700;
+  border:1px solid rgba(255,255,255,.3);
+}
+.btn-ico{
+  background:rgba(255,255,255,.18); color:#fff;
+  border:1px solid rgba(255,255,255,.35);
+  width:36px; height:36px; border-radius:10px;
+  font-size:1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .12s, background .15s;
+}
+.btn-ico:hover{ transform:translateY(-2px); background:rgba(255,255,255,.28); }
+.btn-docente{
+  background:rgba(255,255,255,.18); color:#fff;
+  border:1px solid rgba(255,255,255,.35);
+  width:36px; height:36px; border-radius:10px;
+  font-size:1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .12s, background .15s;
+}
+.btn-docente:hover{ transform:translateY(-2px); background:rgba(255,255,255,.28); }
+.btn-docente.activo{ background:#fbbf24; color:#78350f; border-color:#f59e0b; }
+
+.btn{
+  border:none; border-radius:10px; padding:10px 18px;
+  font-size:.88rem; font-weight:700; cursor:pointer;
+  background:linear-gradient(120deg,#4338ca,#0ea5e9); color:#fff;
+  box-shadow:0 6px 18px rgba(67,56,202,.35);
+  transition:transform .12s, box-shadow .12s, filter .15s;
+}
+.btn:hover{ transform:translateY(-2px); filter:brightness(1.05); }
+.btn:active{ transform:translateY(0); }
+.btn.sec{ background:var(--card); color:var(--acento); border:1.5px solid var(--acento); box-shadow:none; }
+.btn.ghost{ background:transparent; color:var(--texto-suave); border:1.5px solid var(--borde); box-shadow:none; }
+.btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; filter:none; }
+.btn-grande{ padding:14px 28px; font-size:1rem; border-radius:12px; }
+
+main{ max-width:1200px; margin:0 auto; padding:22px; }
+.pantalla{ display:none; animation:fadeIn .35s ease; }
+.pantalla.activa{ display:block; }
+@keyframes fadeIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
+
+.inicio-card{
+  max-width:560px; margin:5vh auto;
+  background:var(--card); border-radius:22px;
+  padding:40px 34px; box-shadow:var(--sombra);
+  border:1px solid var(--borde); text-align:center;
+}
+.inicio-emoji{ font-size:4rem; line-height:1; }
+.inicio-card h2{ margin:14px 0 6px; font-size:1.6rem; color:var(--acento); }
+.inicio-card p{ margin:0 0 22px; color:var(--texto-suave); font-size:.95rem; line-height:1.6; }
+.campo{ display:flex; flex-direction:column; gap:6px; text-align:left; margin-bottom:16px; }
+.campo label{ font-size:.85rem; font-weight:700; color:var(--texto-suave); }
+.campo input{
+  padding:12px 14px; border:2px solid var(--input-borde);
+  border-radius:11px; font-size:1rem; font-weight:600;
+  background:var(--input-bg); color:var(--texto);
+  transition:border-color .15s, box-shadow .15s;
+}
+.campo input:focus{ outline:none; border-color:var(--acento); box-shadow:0 0 0 3px rgba(79,70,229,.18); }
+.campo-ayuda{ font-size:.75rem; color:var(--texto-suave); }
+
+.mapa-header{ text-align:center; margin-bottom:26px; }
+.mapa-header h2{ margin:0 0 6px; font-size:1.5rem; color:var(--acento); }
+.mapa-header p{ margin:0; color:var(--texto-suave); font-size:.92rem; }
+.barra-progreso{ max-width:520px; margin:16px auto 0; height:14px; border-radius:20px; overflow:hidden; background:var(--borde); }
+.barra-progreso > div{ height:100%; width:0%; background:linear-gradient(90deg,#4338ca,#0ea5e9,#10b981); border-radius:20px; transition:width .8s cubic-bezier(.34,1.3,.64,1); }
+.mapa-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+.nivel-card{
+  background:var(--card); border-radius:18px; padding:20px;
+  border:2px solid var(--borde); box-shadow:var(--sombra);
+  cursor:pointer; transition:transform .18s, border-color .18s, box-shadow .18s;
+  position:relative; overflow:hidden;
+}
+.nivel-card:hover{ transform:translateY(-4px); border-color:var(--acento); }
+.nivel-card.bloqueado{ opacity:.55; cursor:not-allowed; filter:grayscale(.5); }
+.nivel-card.bloqueado:hover{ transform:none; border-color:var(--borde); }
+.nivel-card.completado{ border-color:var(--ok); }
+.nivel-num{
+  position:absolute; top:-10px; right:-10px;
+  width:70px; height:70px; border-radius:50%;
+  background:linear-gradient(120deg,#4338ca,#0ea5e9);
+  color:#fff; font-weight:800; font-size:1.4rem;
+  display:flex; align-items:center; justify-content:center;
+  opacity:.15;
+}
+.nivel-card.completado .nivel-num{ background:linear-gradient(120deg,#10b981,#059669); opacity:.18; }
+.nivel-ico{ font-size:2.4rem; line-height:1; margin-bottom:8px; }
+.nivel-card h3{ margin:0 0 4px; font-size:1rem; color:var(--texto); }
+.nivel-card p{ margin:0; font-size:.82rem; color:var(--texto-suave); line-height:1.5; }
+.nivel-estrellas{ margin-top:10px; font-size:1.1rem; letter-spacing:2px; }
+.nivel-estrellas .off{ opacity:.2; }
+.badge-completado{ display:inline-block; margin-top:6px; background:var(--ok); color:#fff; font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+
+.nivel-top{ display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+.nivel-top h2{ margin:0; font-size:1.15rem; color:var(--acento); flex:1; }
+.nivel-stats{ display:flex; gap:8px; flex-wrap:wrap; }
+.stat-pill{ background:var(--card); border:1.5px solid var(--borde); padding:6px 12px; border-radius:10px; font-size:.85rem; font-weight:700; color:var(--texto-suave); }
+.stat-pill b{ color:var(--texto); }
+
+.mision{
+  display:flex; gap:16px; align-items:center;
+  background:linear-gradient(120deg,#4f46e5,#06b6d4);
+  color:#fff; padding:18px 22px; border-radius:18px;
+  box-shadow:0 12px 30px rgba(79,70,229,.28);
+  margin-bottom:18px;
+}
+.mision-icono{ font-size:2.2rem; line-height:1; flex-shrink:0; }
+.mision-texto h3{ margin:0 0 6px; font-size:1.05rem; letter-spacing:.4px; }
+.mision-texto p{ margin:0; font-size:.9rem; line-height:1.55; opacity:.96; }
+.mision-texto b{ background:rgba(255,255,255,.22); padding:1px 6px; border-radius:5px; }
+
+.nivel-layout{ display:grid; grid-template-columns:300px minmax(0,1fr); gap:18px; align-items:start; }
+@media (max-width:880px){ .nivel-layout{ grid-template-columns:1fr; } }
+
+.card{
+  background:var(--card); border-radius:16px; padding:18px;
+  box-shadow:var(--sombra); border:1px solid var(--borde);
+  margin-bottom:16px;
+}
+.card h3{ margin:0 0 10px; font-size:1rem; color:var(--acento); }
+.ayuda{ font-size:.83rem; color:var(--texto-suave); line-height:1.55; margin:0; }
+.nota{ margin-top:12px; }
+
+details.card summary{ cursor:pointer; font-weight:700; color:var(--acento); font-size:1rem; list-style:none; }
+details.card summary::-webkit-details-marker{ display:none; }
+details.card summary::before{ content:"▸ "; }
+details.card[open] summary::before{ content:"▾ "; }
+details.card[open] summary{ margin-bottom:12px; }
+.formulas{ margin:0 0 8px; padding-left:20px; font-size:.86rem; line-height:1.9; color:var(--texto-suave); }
+
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.chip{
+  background:#e0e7ff; color:#3730a3; font-weight:700;
+  font-size:.85rem; padding:5px 10px; border-radius:8px;
+  border:1px solid #c7d2fe;
+}
+.chip.falta{ background:#fef3c7; color:#92400e; border-color:#fcd34d; }
+body.oscuro .chip{ background:#312e81; color:#c7d2fe; border-color:#4338ca; }
+body.oscuro .chip.falta{ background:#451a03; color:#fcd34d; border-color:#b45309; }
+
+.fases{ display:flex; flex-direction:column; gap:6px; }
+.fase-pill{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:9px;
+  font-size:.85rem; font-weight:600;
+  background:var(--tabla-head); color:var(--texto-suave);
+  border:1px solid var(--borde); transition:all .25s;
+}
+.fase-pill .ico{ width:16px; text-align:center; }
+.fase-pill.activa{ background:#e0e7ff; color:#3730a3; border-color:#a5b4fc; }
+body.oscuro .fase-pill.activa{ background:#312e81; color:#c7d2fe; border-color:#4338ca; }
+.fase-pill.hecha{ background:#dcfce7; color:#15803d; border-color:#86efac; }
+body.oscuro .fase-pill.hecha{ background:#064e3b; color:#6ee7b7; border-color:#10b981; }
+
+.tabla-caja{ border-radius:14px; overflow:auto; border:1px solid var(--borde); }
+table{ width:100%; border-collapse:collapse; min-width:420px; }
+thead th{ background:linear-gradient(120deg,#4338ca,#0ea5e9); color:#fff; font-size:.85rem; letter-spacing:.6px; padding:12px 6px; font-weight:700; }
+tbody td{ padding:6px; border-bottom:1px solid var(--borde); text-align:center; }
+tbody tr:nth-child(even){ background:var(--tabla-alt); }
+tfoot td{ padding:11px 6px; background:var(--tabla-head); font-weight:800; color:var(--texto-suave); font-size:.9rem; text-align:center; }
+
+.celda{ display:flex; align-items:center; justify-content:center; gap:2px; }
+.celda input{
+  width:100%; min-width:0; max-width:130px;
+  padding:9px 6px; border:2px solid var(--input-borde); border-radius:9px;
+  font-size:1rem; font-weight:700; text-align:center;
+  color:var(--texto); background:var(--input-bg);
+  transition:border-color .15s, background .15s, box-shadow .15s;
+}
+.celda input:focus{ outline:none; border-color:var(--acento); box-shadow:0 0 0 3px rgba(79,70,229,.18); }
+.celda input:disabled{ background:var(--tabla-head); border-color:var(--borde); color:var(--texto-suave); cursor:not-allowed; }
+.celda input.bien{ border-color:var(--ok); background:#f0fdf4; color:#15803d; }
+body.oscuro .celda input.bien{ background:#052e16; color:#6ee7b7; }
+.celda input.mal{ border-color:var(--error); background:#fef2f2; color:#dc2626; }
+body.oscuro .celda input.mal{ background:#450a0a; color:#fca5a5; }
+.celda input.nueva{ border-color:#06b6d4; animation:pulso .9s ease-out 2; }
+
+.marca{ width:16px; font-size:1rem; font-weight:900; flex-shrink:0; }
+.marca.ok{ color:var(--ok); }
+.marca.error{ color:var(--error); }
+
+@keyframes shake{
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-5px); }
+  40%{ transform:translateX(5px); }
+  60%{ transform:translateX(-3px); }
+  80%{ transform:translateX(3px); }
+}
+input.shake{ animation:shake .35s; }
+@keyframes pulso{ 0%{ box-shadow:0 0 0 0 rgba(6,182,212,.55); } 100%{ box-shadow:0 0 0 12px rgba(6,182,212,0); } }
+
+kbd{ background:var(--tabla-head); border:1px solid var(--borde); border-bottom-width:2px; border-radius:5px; padding:1px 6px; font-size:.75rem; }
+
+.medidas-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:8px; }
+.medida-card{ background:var(--tabla-alt); border:2px solid var(--borde); border-radius:14px; padding:16px; }
+.medida-card h4{ margin:0 0 6px; color:var(--acento); font-size:.95rem; }
+.medida-card p{ margin:0 0 12px; font-size:.8rem; color:var(--texto-suave); line-height:1.5; }
+.medida-card .campo-medida{ display:flex; gap:6px; align-items:center; }
+.medida-card input{
+  flex:1; padding:10px 12px; border:2px solid var(--input-borde);
+  border-radius:10px; font-size:1rem; font-weight:700;
+  background:var(--input-bg); color:var(--texto); text-align:center;
+}
+.medida-card input:focus{ outline:none; border-color:var(--acento); }
+.medida-card input.bien{ border-color:var(--ok); background:#f0fdf4; color:#15803d; }
+body.oscuro .medida-card input.bien{ background:#052e16; color:#6ee7b7; }
+.medida-card input.mal{ border-color:var(--error); background:#fef2f2; color:#dc2626; }
+body.oscuro .medida-card input.mal{ background:#450a0a; color:#fca5a5; }
+
+.grafico-caja{ background:var(--tabla-alt); border-radius:14px; padding:12px; border:1px solid var(--borde); overflow:hidden; }
+.grafico-caja svg{ width:100%; height:auto; display:block; }
+.valores-barras{ display:flex; justify-content:space-around; margin-top:10px; gap:6px; flex-wrap:wrap; }
+.valor-barra{ text-align:center; font-size:.85rem; padding:6px 10px; border-radius:9px; background:var(--card); border:1px solid var(--borde); min-width:60px; font-weight:700; color:var(--texto); }
+.valor-barra.bien{ border-color:var(--ok); color:var(--ok); background:#f0fdf4; }
+body.oscuro .valor-barra.bien{ background:#052e16; }
+.valor-barra.mal{ border-color:var(--error); color:var(--error); background:#fef2f2; }
+body.oscuro .valor-barra.mal{ background:#450a0a; }
+
+.problema-card{
+  background:var(--card); border:2px solid var(--borde);
+  border-radius:14px; padding:18px; margin-bottom:14px;
+}
+.problema-card h4{ margin:0 0 10px; font-size:.98rem; color:var(--acento); }
+.problema-card .enunciado{ font-size:.9rem; line-height:1.6; color:var(--texto); margin-bottom:12px; }
+.problema-card .datos-problema{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+.problema-card .datos-problema .chip{ font-size:1rem; padding:8px 14px; }
+.problema-card .faltante-input{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.problema-card .faltante-input input{
+  padding:10px 12px; border:2px solid var(--input-borde);
+  border-radius:10px; font-size:1rem; font-weight:700;
+  background:var(--input-bg); color:var(--texto); text-align:center;
+  width:130px;
+}
+.problema-card .faltante-input input:focus{ outline:none; border-color:var(--acento); }
+.problema-card .faltante-input input.bien{ border-color:var(--ok); background:#f0fdf4; color:#15803d; }
+body.oscuro .problema-card .faltante-input input.bien{ background:#052e16; color:#6ee7b7; }
+.problema-card .faltante-input input.mal{ border-color:var(--error); background:#fef2f2; color:#dc2626; }
+body.oscuro .problema-card .faltante-input input.mal{ background:#450a0a; color:#fca5a5; }
+.feedback-ok{
+  margin-top:10px; padding:10px 14px;
+  background:#ecfeff; border-left:4px solid #06b6d4;
+  border-radius:8px; font-size:.85rem; color:#0e7490; line-height:1.5;
+}
+body.oscuro .feedback-ok{ background:#083344; color:#67e8f9; }
+
+.toast{
+  position:fixed; left:50%; bottom:26px;
+  transform:translate(-50%,180%);
+  background:#1e293b; color:#fff;
+  padding:14px 22px; border-radius:12px;
+  font-size:.9rem; line-height:1.45; text-align:center;
+  box-shadow:0 12px 32px rgba(0,0,0,.3);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:300; max-width:90vw;
+}
+.toast.visible{ transform:translate(-50%,0); }
+.toast b{ color:#67e8f9; }
+
+.overlay{
+  position:fixed; inset:0; background:rgba(15,23,42,.6);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .3s;
+  z-index:200; padding:20px;
+}
+.overlay.visible{ opacity:1; pointer-events:auto; }
+.modal{
+  background:var(--card); border-radius:22px; padding:32px 28px;
+  text-align:center; max-width:460px; width:100%;
+  transform:scale(.85); color:var(--texto);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 30px 60px rgba(0,0,0,.35);
+}
+.overlay.visible .modal{ transform:scale(1); }
+.modal.grande{ max-width:760px; }
+.modal-emoji{ font-size:3.4rem; line-height:1; }
+.modal h2{ margin:12px 0 8px; color:var(--acento); }
+.modal p{ color:var(--texto-suave); font-size:.92rem; line-height:1.6; margin:0 0 22px; }
+.modal-botones{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+#confeti{ position:fixed; inset:0; pointer-events:none; z-index:250; }
+
+.final-card{
+  max-width:600px; margin:5vh auto;
+  background:var(--card); border-radius:22px;
+  padding:40px 30px; box-shadow:var(--sombra);
+  border:1px solid var(--borde); text-align:center;
+}
+.final-emoji{ font-size:5rem; line-height:1; }
+.final-card h2{ margin:14px 0 8px; font-size:1.7rem; color:var(--acento); }
+.final-card p{ color:var(--texto-suave); font-size:.95rem; line-height:1.6; margin:0 0 24px; }
+.final-estrellas{ font-size:1.5rem; letter-spacing:3px; margin:14px 0; line-height:1.6; }
+
+/* DOCENTE */
+.docente-tabla{ width:100%; border-collapse:collapse; font-size:.85rem; }
+.docente-tabla th, .docente-tabla td{ padding:10px 8px; text-align:left; border-bottom:1px solid var(--borde); }
+.docente-tabla th{ background:var(--tabla-head); color:var(--texto-suave); font-weight:800; font-size:.72rem; letter-spacing:.5px; text-transform:uppercase; }
+.docente-tabla tr:hover td{ background:var(--tabla-alt); }
+.docente-tabla .acciones{ display:flex; gap:6px; }
+.mini-btn{
+  padding:5px 10px; border-radius:7px; font-size:.72rem;
+  font-weight:700; cursor:pointer; border:none;
+  background:var(--tabla-head); color:var(--texto);
+  font-family:inherit; transition:background .15s;
+}
+.mini-btn:hover{ background:var(--borde); }
+.mini-btn.peligro{ background:#fee2e2; color:#b91c1c; }
+.mini-btn.peligro:hover{ background:#fecaca; }
+.mini-btn.primario{ background:linear-gradient(120deg,#4338ca,#0ea5e9); color:#fff; }
+.mini-btn.primario:hover{ filter:brightness(1.05); }
+
+.docente-niveles{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px; margin-top:12px;
+}
+.docente-nivel-btn{
+  padding:14px 10px; border-radius:12px;
+  border:2px solid var(--borde); background:var(--card);
+  cursor:pointer; font-weight:700; color:var(--texto);
+  display:flex; flex-direction:column; gap:4px; align-items:center;
+  font-family:inherit; transition:transform .15s, border-color .15s;
+}
+.docente-nivel-btn:hover{ transform:translateY(-3px); border-color:var(--acento); }
+.docente-nivel-btn .num{ font-size:1.5rem; color:var(--acento); line-height:1; }
+.docente-nivel-btn .txt{ font-size:.75rem; text-align:center; line-height:1.3; }
+
+.sin-registros{ text-align:center; padding:30px; color:var(--texto-suave); font-size:.9rem; }
+textarea.importar{
+  width:100%; min-height:100px; padding:12px;
+  border:2px solid var(--input-borde); border-radius:10px;
+  font-family:'Courier New', monospace; font-size:.78rem;
+  background:var(--input-bg); color:var(--texto); resize:vertical;
+}
+textarea.importar:focus{ outline:none; border-color:var(--acento); }
+</style>
+</head>
+<body>
+
+<canvas id="confeti"></canvas>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">📊</span>
+      <div>
+        <h1>EstadísticaQuest</h1>
+        <p id="logoSub">Aventura estadística</p>
+      </div>
+    </div>
+    <div class="header-botones">
+      <span class="pill" id="puntajeHeader">⭐ 0 pts</span>
+      <span class="pill" id="nombreHeader" style="display:none"></span>
+      <button class="btn-docente" id="btnDocente" title="Modo docente">👨‍🏫</button>
+      <button class="btn-ico" id="btnSonido" title="Sonido">🔊</button>
+      <button class="btn-ico" id="btnOscuro" title="Modo oscuro">🌙</button>
+      <button class="btn-ico" id="btnInicio" title="Inicio">🏠</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="pantalla-inicio" class="pantalla activa">
+    <div class="inicio-card">
+      <div class="inicio-emoji">🎓</div>
+      <h2>EstadísticaQuest</h2>
+      <p>Una aventura de <b>10 niveles</b> para dominar la estadística descriptiva: tablas de frecuencia, datos agrupados, medidas de tendencia central, lectura de gráficos, cuartiles, rango intercuartil, diagrama de caja y problemas de razonamiento.</p>
+      <div class="campo">
+        <label for="inputNombre">👤 Tu nombre</label>
+        <input type="text" id="inputNombre" placeholder="Ej: Ana Pérez" maxlength="30" autocomplete="off">
+      </div>
+      <div class="campo">
+        <label for="inputSemilla">🎲 Semilla (opcional · misma semilla = mismos datos)</label>
+        <input type="text" id="inputSemilla" placeholder="Deja vacío para aleatorio" autocomplete="off">
+        <span class="campo-ayuda">Útil para que todo el curso trabaje con los mismos datos.</span>
+      </div>
+      <button class="btn btn-grande" id="btnComenzar" style="width:100%">🚀 Comenzar aventura</button>
+      <button class="btn ghost" id="btnContinuar" style="width:100%; margin-top:10px; display:none">▶ Continuar partida guardada</button>
+    </div>
+  </section>
+
+  <section id="pantalla-mapa" class="pantalla">
+    <div class="mapa-header">
+      <h2 id="saludoMapa">¡Hola, estudiante! 👋</h2>
+      <p>Selecciona un nivel para comenzar. Los niveles se desbloquean en orden.</p>
+      <div class="barra-progreso"><div id="barraProgreso"></div></div>
+      <div style="margin-top:14px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+        <button class="btn ghost" id="btnCompartir">📤 Compartir progreso con el docente</button>
+      </div>
+    </div>
+    <div class="mapa-grid" id="mapaGrid"></div>
+  </section>
+
+  <section id="pantalla-nivel" class="pantalla">
+    <div class="nivel-top">
+      <button class="btn ghost" id="btnVolverMapa">← Volver al mapa</button>
+      <h2 id="nivelTitulo">Nivel</h2>
+      <div class="nivel-stats">
+        <span class="stat-pill" id="nivelTimer">⏱ <b>00:00</b></span>
+        <span class="stat-pill" id="nivelErrores">✖ <b>0</b></span>
+        <button class="btn ghost" id="btnProfesor" title="Mostrar solución (modo profesor)">👨‍🏫</button>
+        <button class="btn ghost" id="btnAyuda" title="Mostrar siguiente respuesta">💡 Ayuda</button>
+      </div>
+    </div>
+    <div id="nivelContenido"></div>
+  </section>
+
+  <section id="pantalla-final" class="pantalla">
+    <div class="final-card">
+      <div class="final-emoji">🏆</div>
+      <h2>¡Felicidades, <span id="nombreFinal">estudiante</span>!</h2>
+      <p>Completaste los 10 niveles de EstadísticaQuest. Dominas tablas de frecuencia, medidas de tendencia central, cuartiles, diagrama de caja y problemas de razonamiento estadístico.</p>
+      <div class="final-estrellas" id="estrellasFinal">⭐⭐⭐⭐⭐</div>
+      <p><b id="puntajeFinal"></b> puntos acumulados</p>
+      <button class="btn btn-grande" id="btnVerMapa">🗺 Ver mapa de niveles</button>
+      <button class="btn ghost" id="btnReiniciarTodo" style="margin-top:10px">↺ Empezar de nuevo</button>
+    </div>
+  </section>
+
+  <section id="pantalla-docente" class="pantalla">
+    <div class="nivel-top">
+      <button class="btn ghost" id="btnSalirDocente">🚪 Salir de modo docente</button>
+      <h2>👨‍🏫 Panel del docente</h2>
+      <div class="nivel-stats">
+        <span class="stat-pill" id="docTotalEst">📋 <b>0</b> registros</span>
+        <button class="btn ghost" id="btnExportarTodo">📤 Exportar</button>
+        <button class="btn ghost" id="btnLimpiarRegistros">🗑 Limpiar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Registro de estudiantes</h3>
+      <p class="ayuda">Los puntajes se guardan automáticamente al completar niveles en este dispositivo. También puedes importar códigos que te envíen tus estudiantes desde otros dispositivos.</p>
+      <div id="docTablaCont" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h3>📥 Importar códigos de estudiantes</h3>
+      <p class="ayuda">Pega aquí los códigos que te enviaron tus estudiantes (uno por línea o separados por comas). Se agregarán al registro.</p>
+      <textarea class="importar" id="docImportar" placeholder="Pega aquí los códigos..."></textarea>
+      <div style="margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+        <button class="btn" id="btnImportar">📥 Importar códigos</button>
+        <span class="ayuda" id="importFeedback"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 Acceso directo a niveles</h3>
+      <p class="ayuda">Salta directamente a cualquier nivel para resolver preguntas con tus estudiantes. Tus avances personales quedan respaldados y se restauran al salir del modo docente.</p>
+      <div class="docente-niveles" id="docNiveles"></div>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast"></div>
+<div id="overlay" class="overlay"><div class="modal" id="modalContenido"></div></div>
+
+<script>
+/* =========================================================
+   ESTADÍSTICAQUEST · v4 (10 niveles + panel docente)
+   ========================================================= */
+
+const STORAGE_KEY = 'estadisticaquest_v4';
+const REGISTROS_KEY = 'estadisticaquest_registros';
+const DOCENTE_PASS = 'docente';
+
+const app = {
+  nombre: '',
+  semilla: 0,
+  modoOscuro: false,
+  sonidoActivo: true,
+  modoDocente: false,
+  backupEstudiante: null,
+  puntajeTotal: 0,
+  niveles: {
+    1:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    2:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    3:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    4:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    5:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    6:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    7:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    8:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    9:{ completado:false, estrellas:0, errores:0, tiempo:0 },
+    10:{ completado:false, estrellas:0, errores:0, tiempo:0 }
+  }
+};
+
+/* ==================== UTILIDADES ==================== */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function shuffle(a, rng){
+  const rand = rng || Math.random;
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seedFor(nivel){ return (app.semilla * 1000 + nivel * 13 + 7) >>> 0; }
+
+function parseNum(bruto){
+  let s = String(bruto).trim().replace(/\s+/g, '').replace(',', '.');
+  if(s === '') return NaN;
+  if(s.endsWith('%')){
+    const v = parseFloat(s.slice(0, -1));
+    return isNaN(v) ? NaN : v / 100;
+  }
+  if(s.includes('/')){
+    const p = s.split('/');
+    if(p.length !== 2) return NaN;
+    const a = parseFloat(p[0]), b = parseFloat(p[1]);
+    if(isNaN(a) || isNaN(b) || b === 0) return NaN;
+    return a / b;
+  }
+  return parseFloat(s);
+}
+const casi = (a, b) => Number.isFinite(a) && Math.abs(a - b) < 1e-9;
+function fmtTiempo(seg){
+  const m = Math.floor(seg / 60).toString().padStart(2,'0');
+  const s = (seg % 60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+/* Cuartiles (método "mitad y mitad") + rango intercuartil */
+function calcularCuartiles(ordenados){
+  const n = ordenados.length;
+  const mediana = arr => {
+    const m = arr.length;
+    if(m === 0) return 0;
+    if(m % 2 === 0) return (arr[m/2-1] + arr[m/2]) / 2;
+    return arr[Math.floor(m/2)];
+  };
+  const q2 = mediana(ordenados);
+  const mitad = Math.floor(n / 2);
+  const inf = ordenados.slice(0, mitad);
+  const sup = n % 2 === 0 ? ordenados.slice(mitad) : ordenados.slice(mitad + 1);
+  const q1 = mediana(inf);
+  const q3 = mediana(sup);
+  return {
+    min: ordenados[0],
+    max: ordenados[n-1],
+    q1, q2, q3,
+    iqr: q3 - q1
+  };
+}
+
+/* ==================== SOUND ==================== */
+let audioCtx = null;
+function ctxA(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ return null; }
+  }
+  return audioCtx;
+}
+function tono(freq, dur, delay=0, tipo='sine', vol=0.12){
+  if(!app.sonidoActivo) return;
+  const ctx = ctxA(); if(!ctx) return;
+  const t = ctx.currentTime + delay;
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
+  osc.type = tipo;
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t); osc.stop(t + dur + 0.05);
+}
+const sonidos = {
+  correcto: () => { tono(660,0.10); tono(880,0.14,0.09); },
+  error:    () => { tono(180,0.22,0,'sawtooth',0.09); },
+  fase:     () => { tono(523,0.13); tono(659,0.13,0.11); tono(784,0.20,0.22); },
+  nivel:    () => { [523,659,784,1047].forEach((f,i)=>tono(f,0.24,i*0.12)); },
+  click:    () => tono(600,0.04,0,'sine',0.06)
+};
+
+/* ==================== CONFETI ==================== */
+const cvConf = document.getElementById('confeti');
+const ctxConf = cvConf.getContext('2d');
+let particulas = [];
+let animando = false;
+function ajustarCanvas(){ cvConf.width = window.innerWidth; cvConf.height = window.innerHeight; }
+ajustarCanvas();
+window.addEventListener('resize', ajustarCanvas);
+
+function lanzarConfeti(n = 90){
+  const w = cvConf.width, h = cvConf.height;
+  const colores = ['#4338ca','#0ea5e9','#f59e0b','#ef4444','#10b981','#a855f7','#ec4899'];
+  for(let i = 0; i < n; i++){
+    particulas.push({
+      x: w/2 + (Math.random()-0.5)*260, y: h*0.25,
+      vx: (Math.random()-0.5)*10, vy: -Math.random()*11 - 3, g: 0.35,
+      tam: 6 + Math.random()*7,
+      color: colores[Math.floor(Math.random()*colores.length)],
+      rot: Math.random()*Math.PI*2, vr: (Math.random()-0.5)*0.35, vida: 1
+    });
+  }
+  if(!animando){ animando = true; requestAnimationFrame(animarConfeti); }
+}
+function animarConfeti(){
+  const w = cvConf.width, h = cvConf.height;
+  ctxConf.clearRect(0,0,w,h);
+  particulas.forEach(p => {
+    p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vida -= 0.008;
+    ctxConf.save();
+    ctxConf.translate(p.x, p.y); ctxConf.rotate(p.rot);
+    ctxConf.globalAlpha = Math.max(0, p.vida);
+    ctxConf.fillStyle = p.color;
+    ctxConf.fillRect(-p.tam/2, -p.tam/2, p.tam, p.tam*0.62);
+    ctxConf.restore();
+  });
+  particulas = particulas.filter(p => p.vida > 0 && p.y < h + 60);
+  if(particulas.length) requestAnimationFrame(animarConfeti);
+  else { ctxConf.clearRect(0,0,w,h); animando = false; }
+}
+
+/* ==================== TOAST / MODAL ==================== */
+let toastTimer = null;
+function toast(html, dur = 3200){
+  const t = $('#toast');
+  t.innerHTML = html;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), dur);
+}
+function abrirModal({emoji, titulo, texto, botones = []}){
+  $('#modalContenido').innerHTML = `
+    <div class="modal-emoji">${emoji}</div>
+    <h2>${titulo}</h2>
+    <p>${texto}</p>
+    <div class="modal-botones" id="modalBotones"></div>`;
+  const cont = $('#modalBotones');
+  botones.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (b.sec ? ' sec' : '') + (b.ghost ? ' ghost' : '');
+    btn.textContent = b.texto;
+    btn.onclick = () => { cerrarModal(); if(b.accion) b.accion(); };
+    cont.appendChild(btn);
+  });
+  $('#overlay').classList.add('visible');
+}
+function cerrarModal(){
+  $('#overlay').classList.remove('visible');
+  $('#modalContenido').classList.remove('grande');
+}
+
+/* ==================== GUARDADO ==================== */
+function guardar(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(app)); }catch(e){} }
+function cargar(){
+  try{
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(d && typeof d === 'object'){ Object.assign(app, d); return true; }
+  }catch(e){}
+  return false;
+}
+
+/* ==================== REGISTRO DE ESTUDIANTES ==================== */
+function guardarRegistroEstudiante(){
+  try{
+    let regs = JSON.parse(localStorage.getItem(REGISTROS_KEY)) || [];
+    const id = app.nombre + '|' + app.semilla;
+    const registro = {
+      id, nombre: app.nombre, semilla: app.semilla,
+      puntaje: app.puntajeTotal,
+      niveles: JSON.parse(JSON.stringify(app.niveles)),
+      actualizado: Date.now()
+    };
+    const idx = regs.findIndex(r => r.id === id);
+    if(idx >= 0) regs[idx] = registro; else regs.push(registro);
+    localStorage.setItem(REGISTROS_KEY, JSON.stringify(regs));
+  }catch(e){}
+}
+function generarCodigoEstudiante(){
+  if(!app.nombre) return null;
+  const data = { v: 1, n: app.nombre, s: app.semilla, p: app.puntajeTotal, nv: app.niveles, t: Date.now() };
+  try{ return btoa(unescape(encodeURIComponent(JSON.stringify(data)))); }
+  catch(e){ return null; }
+}
+function parsearCodigoEstudiante(codigo){
+  try{
+    const json = decodeURIComponent(escape(atob(String(codigo).trim())));
+    const d = JSON.parse(json);
+    if(!d || !d.n) return null;
+    return {
+      id: d.n + '|' + d.s, nombre: d.n, semilla: d.s,
+      puntaje: typeof d.p === 'number' ? d.p : 0,
+      niveles: d.nv || {}, actualizado: d.t || Date.now()
+    };
+  }catch(e){ return null; }
+}
+function importarCodigos(texto){
+  const codigos = String(texto).split(/[\n,;]+/).map(s => s.trim()).filter(s => s.length > 0);
+  let regs = [];
+  try{ regs = JSON.parse(localStorage.getItem(REGISTROS_KEY)) || []; }catch(e){}
+  let importados = 0, errores = 0;
+  codigos.forEach(cod => {
+    const r = parsearCodigoEstudiante(cod);
+    if(!r){ errores++; return; }
+    const idx = regs.findIndex(x => x.id === r.id);
+    if(idx >= 0){ if(r.actualizado > (regs[idx].actualizado || 0)) regs[idx] = r; }
+    else regs.push(r);
+    importados++;
+  });
+  localStorage.setItem(REGISTROS_KEY, JSON.stringify(regs));
+  return { importados, errores };
+}
+
+/* ==================== NAVEGACIÓN ==================== */
+function irA(id){
+  $$('.pantalla').forEach(p => p.classList.remove('activa'));
+  $('#' + id).classList.add('activa');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function actualizarHeader(){
+  $('#puntajeHeader').textContent = `⭐ ${app.puntajeTotal} pts`;
+  const nh = $('#nombreHeader');
+  if(app.nombre){ nh.textContent = '👤 ' + app.nombre; nh.style.display = ''; }
+  else nh.style.display = 'none';
+}
+function actualizarProgresoMapa(){
+  const total = 10;
+  const comp = Object.values(app.niveles).filter(n => n.completado).length;
+  $('#barraProgreso').style.width = (comp / total * 100) + '%';
+}
+
+/* ==================== INFO NIVELES ==================== */
+const NIVELES_INFO = [
+  { id:1, ico:'📋', titulo:'Tabla de frecuencias', desc:'Ordena 20 datos y construye f, F, fr y Fr.' },
+  { id:2, ico:'📐', titulo:'Datos agrupados en intervalos', desc:'Trabaja con estaturas agrupadas en clases.' },
+  { id:3, ico:'📊', titulo:'Tendencia central', desc:'Calcula media, mediana y moda.' },
+  { id:4, ico:'📈', titulo:'Leer gráfico y completar tabla', desc:'Completa f y fr (%) a partir de un gráfico.' },
+  { id:5, ico:'🥧', titulo:'Encuesta de satisfacción', desc:'Completa la tabla desde un gráfico circular.' },
+  { id:6, ico:'🔢', titulo:'Ordenar y calcular cuartiles', desc:'Ordena datos, encuentra Q₁, Q₂, Q₃ y el IQR.' },
+  { id:7, ico:'📉', titulo:'Cuartiles desde tabla', desc:'Calcula las 5 medidas y el rango intercuartil.' },
+  { id:8, ico:'📊', titulo:'Cuartiles desde gráfico', desc:'Obtén cuartiles e IQR leyendo un gráfico.' },
+  { id:9, ico:'📦', titulo:'Construir un boxplot', desc:'Arrastra los marcadores para dibujar la caja.' },
+  { id:10, ico:'🧩', titulo:'Problemas de razonamiento', desc:'Valor faltante y efecto sobre la mediana.' }
+];
+
+function renderMapa(){
+  $('#saludoMapa').textContent = app.modoDocente
+    ? '👨🏫 Modo docente activo'
+    : (app.nombre ? `¡Hola, ${app.nombre}! 👋` : '¡Hola, estudiante! 👋');
+  const grid = $('#mapaGrid');
+  grid.innerHTML = '';
+  let desbloqueadoHasta = 1;
+  if(app.modoDocente){
+    desbloqueadoHasta = 11;
+  } else {
+    for(let i = 1; i <= 10; i++){
+      if(app.niveles[i].completado) desbloqueadoHasta = i + 1;
+    }
+  }
+  NIVELES_INFO.forEach(n => {
+    const estado = app.niveles[n.id];
+    const bloqueado = n.id > desbloqueadoHasta;
+    const card = document.createElement('div');
+    card.className = 'nivel-card' + (bloqueado ? ' bloqueado' : '') + (estado.completado ? ' completado' : '');
+    const estrellas = [1,2,3].map(i => `<span class="${i <= estado.estrellas ? '' : 'off'}">⭐</span>`).join('');
+    card.innerHTML = `
+      <div class="nivel-num">${n.id}</div>
+      <div class="nivel-ico">${bloqueado ? '🔒' : n.ico}</div>
+      <h3>Nivel ${n.id} · ${n.titulo}</h3>
+      <p>${n.desc}</p>
+      <div class="nivel-estrellas">${estrellas}</div>
+      ${estado.completado ? '<div class="badge-completado">✓ Completado</div>' : ''}`;
+    if(!bloqueado) card.onclick = () => { sonidos.click(); iniciarNivel(n.id); };
+    grid.appendChild(card);
+  });
+  actualizarProgresoMapa();
+  const bc = $('#btnCompartir');
+  if(bc) bc.style.display = app.nombre ? 'inline-block' : 'none';
+}
+
+/* ==================== TIMER / ERRORES ==================== */
+let timerInterval = null, segundosActuales = 0;
+function iniciarTimer(){
+  detenerTimer();
+  segundosActuales = 0;
+  $('#nivelTimer').innerHTML = '⏱ <b>00:00</b>';
+  timerInterval = setInterval(() => {
+    segundosActuales++;
+    $('#nivelTimer').innerHTML = `⏱ <b>${fmtTiempo(segundosActuales)}</b>`;
+  }, 1000);
+}
+function detenerTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
+
+let erroresNivel = 0;
+function sumarError(){ erroresNivel++; $('#nivelErrores').innerHTML = `✖ <b>${erroresNivel}</b>`; }
+function resetErrores(){ erroresNivel = 0; $('#nivelErrores').innerHTML = '✖ <b>0</b>'; }
+
+/* ==================== LANZADOR ==================== */
+let nivelActual = null;
+function iniciarNivel(id){
+  nivelActual = id;
+  $('#nivelTitulo').textContent = `Nivel ${id} · ${NIVELES_INFO[id-1].titulo}`;
+  resetErrores();
+  iniciarTimer();
+  $('#nivelContenido').innerHTML = '';
+  if(id === 1) Nivel1.montar($('#nivelContenido'));
+  if(id === 2) Nivel2.montar($('#nivelContenido'));
+  if(id === 3) Nivel3.montar($('#nivelContenido'));
+  if(id === 4) Nivel4.montar($('#nivelContenido'));
+  if(id === 5) Nivel5.montar($('#nivelContenido'));
+  if(id === 6) Nivel6.montar($('#nivelContenido'));
+  if(id === 7) Nivel7.montar($('#nivelContenido'));
+  if(id === 8) Nivel8.montar($('#nivelContenido'));
+  if(id === 9) Nivel9.montar($('#nivelContenido'));
+  if(id === 10) Nivel10.montar($('#nivelContenido'));
+  irA('pantalla-nivel');
+}
+
+/* ==================== COMPLETAR NIVEL ==================== */
+function completarNivel(id, tiempo, errores){
+  detenerTimer();
+  const estrellas = errores === 0 ? 3 : (errores <= 2 ? 2 : 1);
+  const anterior = app.niveles[id];
+  if(!anterior.completado || estrellas > anterior.estrellas){
+    app.niveles[id] = { completado:true, estrellas, errores, tiempo };
+  } else {
+    anterior.completado = true;
+  }
+  app.puntajeTotal = Object.values(app.niveles).reduce((s, n) => s + n.estrellas * 100, 0);
+
+  if(!app.modoDocente && app.nombre) guardarRegistroEstudiante();
+  guardar();
+  actualizarHeader();
+  sonidos.nivel();
+  lanzarConfeti(110);
+
+  const todos = Object.values(app.niveles).every(n => n.completado);
+  abrirModal({
+    emoji: '🏆',
+    titulo: `¡Nivel ${id} completado!`,
+    texto: `Errores: <b>${errores}</b> · Tiempo: <b>${fmtTiempo(tiempo)}</b><br>
+            Estrellas: <b>${'⭐'.repeat(estrellas)}${'☆'.repeat(3-estrellas)}</b><br>
+            Puntaje total: <b>${app.puntajeTotal} pts</b>`,
+    botones: [
+      { texto: '🗺 Volver al mapa', accion: () => { renderMapa(); irA('pantalla-mapa'); } },
+      todos
+        ? { texto: '🎉 Ver final', sec:true, accion: () => mostrarFinal() }
+        : { texto: '➡ Siguiente nivel', sec:true, accion: () => iniciarNivel(Math.min(id+1,10)) }
+    ]
+  });
+}
+
+function mostrarFinal(){
+  $('#nombreFinal').textContent = app.nombre || 'estudiante';
+  const totalEstrellas = Object.values(app.niveles).reduce((s,n) => s + n.estrellas, 0);
+  $('#estrellasFinal').textContent = '⭐'.repeat(totalEstrellas) + '☆'.repeat(30 - totalEstrellas);
+  $('#puntajeFinal').textContent = app.puntajeTotal;
+  lanzarConfeti(180);
+  irA('pantalla-final');
+}
+
+/* =========================================================
+   ====================   NIVEL 1   ========================
+   ========================================================= */
+const Nivel1 = {
+  PATRONES: [[2,5,4,3,4,2],[1,3,5,6,3,2],[2,3,4,5,6],[1,2,3,4,5,5],[3,6,5,4,2],[5,3,6,4,2],[2,2,4,6,4,2],[4,4,4,4,4]],
+  FASES: [
+    { col:0, etiqueta:'Datos', icono:'🔢', titulo:'Fase 1 · Ordena los datos', texto:'Escribe en la columna <b>Datos</b> cada valor <b>distinto</b>, ordenado de <b>menor a mayor</b>.' },
+    { col:1, etiqueta:'f', icono:'🧮', titulo:'Fase 2 · Frecuencia absoluta (f)', texto:'Cuántas veces se repite cada dato.' },
+    { col:2, etiqueta:'F', icono:'➕', titulo:'Fase 3 · Frecuencia acumulada (F)', texto:'Suma acumulada de las f.' },
+    { col:3, etiqueta:'fr', icono:'➗', titulo:'Fase 4 · Frecuencia relativa (fr)', texto:'<b>fr = f ÷ n</b> con n = 20.' },
+    { col:4, etiqueta:'Fr', icono:'🏁', titulo:'Fase 5 · Frecuencia relativa acumulada', texto:'<b>Fr = F ÷ n</b>.' }
+  ],
+  generar(){
+    const rng = mulberry32(seedFor(1));
+    const pat = this.PATRONES[Math.floor(rng() * this.PATRONES.length)];
+    const k = pat.length;
+    const universo = [0,1,2,3,4,5,6,7,8,9];
+    const valores = shuffle(universo.slice(), rng).slice(0, k).sort((a,b)=>a-b);
+    const frec = pat.slice();
+    const F=[], fr=[], Fr=[];
+    let acc = 0;
+    for(let i = 0; i < k; i++){ acc += frec[i]; F.push(acc); fr.push(frec[i]/20); Fr.push(acc/20); }
+    const datos = [];
+    valores.forEach((v,i) => { for(let j=0;j<frec[i];j++) datos.push(v); });
+    shuffle(datos, rng);
+    return { valores, frec, F, fr, Fr, datos, n:20 };
+  },
+  montar(cont){
+    const d = this.generar(), FASES = this.FASES;
+    let faseActual = 0, bloqueado = false;
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono" id="n1Ico">🔢</div>
+        <div class="mision-texto"><h3 id="n1Titulo"></h3><p id="n1Texto"></p></div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card">
+            <h3>📋 Datos recolectados</h3>
+            <p class="ayuda">Variable discreta: <b>n° de hermanos(as)</b> de 20 estudiantes.</p>
+            <div class="chips" id="n1Datos"></div>
+          </div>
+          <div class="card"><h3>🎯 Avance</h3><div class="fases" id="n1Fases"></div></div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>f</b> = veces que se repite.</li>
+              <li><b>F</b> = acumulada de f.</li>
+              <li><b>fr</b> = f ÷ n</li><li><b>Fr</b> = F ÷ n</li>
+            </ul>
+            <p class="ayuda">n = 20</p>
+          </details>
+          <button class="btn ghost" id="n1Export" style="width:100%">📥 Exportar CSV</button>
+        </aside>
+        <section class="card">
+          <h3>🧾 Tabla de frecuencias</h3>
+          <div class="tabla-caja">
+            <table>
+              <thead><tr><th>Datos</th><th>f</th><th>F</th><th>fr</th><th>Fr</th></tr></thead>
+              <tbody id="n1Cuerpo"></tbody>
+              <tfoot><tr><td>Total</td><td>20</td><td>—</td><td>1</td><td>—</td></tr></tfoot>
+            </table>
+          </div>
+          <p class="ayuda nota">Presiona <kbd>Enter</kbd> o haz clic fuera. <b style="color:#16a34a">✔</b> correcto · <b style="color:#dc2626">✖</b> incorrecto.</p>
+        </section>
+      </div>`;
+
+    $('#n1Datos').innerHTML = d.datos.map(v => `<span class="chip">${v}</span>`).join('');
+
+    const celdaHTML = (col, fila) => `
+      <div class="celda">
+        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
+               data-col="${col}" data-fila="${fila}" ${col > faseActual ? 'disabled' : ''}>
+        <span class="marca"></span>
+      </div>`;
+
+    const render = () => {
+      $('#n1Cuerpo').innerHTML = d.valores.map((v,i) => `
+        <tr><td>${celdaHTML(0,i)}</td><td>${celdaHTML(1,i)}</td>
+        <td>${celdaHTML(2,i)}</td><td>${celdaHTML(3,i)}</td><td>${celdaHTML(4,i)}</td></tr>`).join('');
+    };
+
+    const actualizarMision = () => {
+      const f = FASES[faseActual];
+      $('#n1Ico').textContent = f.icono;
+      $('#n1Titulo').textContent = f.titulo;
+      $('#n1Texto').innerHTML = f.texto;
+    };
+    const actualizarProgreso = () => {
+      $('#n1Fases').innerHTML = FASES.map((f,i) => {
+        let c = 'fase-pill', ico = '🔒';
+        if(i < faseActual){ c += ' hecha'; ico = '✔'; }
+        else if(i === faseActual){ c += ' activa'; ico = '▶'; }
+        return `<div class="${c}"><span class="ico">${ico}</span><span>${f.etiqueta}</span></div>`;
+      }).join('');
+    };
+    const comparar = (col, fila, bruto) => {
+      const n = parseNum(bruto);
+      if(!Number.isFinite(n)) return false;
+      switch(col){
+        case 0: return n === d.valores[fila];
+        case 1: return n === d.frec[fila];
+        case 2: return n === d.F[fila];
+        case 3: return casi(n, d.fr[fila]);
+        case 4: return casi(n, d.Fr[fila]);
+      }
+      return false;
+    };
+    const validar = (inp, silencioso) => {
+      if(bloqueado || !inp || inp.readOnly || inp.disabled) return;
+      const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+      if(col !== faseActual) return;
+      const marca = inp.parentElement.querySelector('.marca');
+      const bruto = inp.value.trim();
+      if(bruto === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      if(comparar(col, fila, bruto)){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisarFase();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisarFase = () => {
+      const total = d.valores.length;
+      const ok = $$(`#n1Cuerpo input[data-col="${faseActual}"]`).filter(i => i.dataset.ok === '1').length;
+      if(ok < total) return;
+      bloqueado = true;
+      const etiqueta = FASES[faseActual].etiqueta;
+      setTimeout(() => {
+        if(faseActual === FASES.length - 1){
+          completarNivel(1, segundosActuales, erroresNivel);
+        } else {
+          faseActual++;
+          $$(`#n1Cuerpo input[data-col="${faseActual}"]`).forEach(inp => {
+            inp.disabled = false; inp.classList.add('nueva');
+            setTimeout(() => inp.classList.remove('nueva'), 1900);
+          });
+          const p = $(`#n1Cuerpo input[data-col="${faseActual}"]`);
+          if(p) p.focus({preventScroll:true});
+          actualizarMision(); actualizarProgreso();
+          sonidos.fase();
+          toast(`¡Columna <b>${etiqueta}</b> completada! Se desbloqueó <b>${FASES[faseActual].etiqueta}</b>.`);
+          bloqueado = false;
+        }
+      }, 550);
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault();
+        validar(e.target);
+        if(e.target.readOnly){
+          const col = e.target.dataset.col;
+          const s = $$(`#n1Cuerpo input[data-col="${col}"]`).find(i => !i.readOnly && !i.disabled);
+          if(s) s.focus({preventScroll:true});
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => { if(e.target.tagName === 'INPUT') validar(e.target); });
+
+    $('#btnAyuda').onclick = () => {
+      const inputs = $$(`#n1Cuerpo input[data-col="${faseActual}"]`).filter(i => !i.readOnly);
+      if(!inputs.length){ toast('No hay más casillas.'); return; }
+      const inp = inputs[0];
+      const fila = Number(inp.dataset.fila);
+      const relleno = [d.valores, d.frec, d.F, d.fr, d.Fr];
+      inp.value = relleno[faseActual][fila];
+      validar(inp, true); sumarError();
+      toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Modo profesor: revelar toda la solución. ¿Continuar?')) return;
+      bloqueado = true;
+      const relleno = [d.valores, d.frec, d.F, d.fr, d.Fr];
+      for(let col = 0; col < 5; col++){
+        $$(`#n1Cuerpo input[data-col="${col}"]`).forEach(inp => {
+          const fila = Number(inp.dataset.fila);
+          inp.disabled = false; inp.value = relleno[col][fila];
+          inp.classList.add('bien'); inp.readOnly = true;
+          const m = inp.parentElement.querySelector('.marca');
+          m.textContent = '✔'; m.className = 'marca ok';
+        });
+      }
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(1, segundosActuales, 99), 800);
+    };
+    $('#n1Export').onclick = () => {
+      const filas = [['Datos','f','F','fr','Fr']];
+      d.valores.forEach((v,i) => filas.push([v, d.frec[i], d.F[i], d.fr[i].toFixed(3), d.Fr[i].toFixed(3)]));
+      filas.push(['Total', 20, '', '1.000', '']);
+      const csv = filas.map(r => r.join(';')).join('\n');
+      const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'tabla_frecuencias.csv'; a.click();
+    };
+    render(); actualizarMision(); actualizarProgreso();
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 2   ========================
+   ========================================================= */
+const Nivel2 = {
+  FASES: [
+    { col:0, etiqueta:'Marca de clase', icono:'🎯', titulo:'Fase 1 · Marca de clase', texto:'<b>x<sub>i</sub></b> = (L<sub>inf</sub> + L<sub>sup</sub>) ÷ 2.' },
+    { col:1, etiqueta:'f', icono:'🧮', titulo:'Fase 2 · Frecuencia absoluta', texto:'Datos en cada intervalo.' },
+    { col:2, etiqueta:'F', icono:'➕', titulo:'Fase 3 · Frecuencia acumulada', texto:'Suma acumulada.' },
+    { col:3, etiqueta:'fr', icono:'➗', titulo:'Fase 4 · Frecuencia relativa', texto:'<b>fr = f ÷ n</b>, n = 30.' },
+    { col:4, etiqueta:'Fr', icono:'🏁', titulo:'Fase 5 · Frecuencia relativa acumulada', texto:'<b>Fr = F ÷ n</b>.' }
+  ],
+  generar(){
+    const rng = mulberry32(seedFor(2));
+    const datos = []; let intentos = 0;
+    while(datos.length < 30 && intentos < 500){
+      intentos++;
+      const u1 = Math.max(rng(), 1e-9), u2 = rng();
+      const z = Math.sqrt(-2*Math.log(u1)) * Math.cos(2*Math.PI*u2);
+      const v = 170 + z*7.5;
+      if(v >= 150 && v < 190) datos.push(Math.round(v*10)/10);
+    }
+    while(datos.length < 30) datos.push(Math.round((150 + rng()*40)*10)/10);
+    const intervalos = [
+      {inf:150, sup:158}, {inf:158, sup:166}, {inf:166, sup:174},
+      {inf:174, sup:182}, {inf:182, sup:190}
+    ];
+    const marca = intervalos.map(iv => (iv.inf + iv.sup)/2);
+    const frec = intervalos.map(iv => datos.filter(x => x >= iv.inf && x < iv.sup).length);
+    const n = datos.length;
+    const F=[], fr=[], Fr=[]; let acc = 0;
+    for(let i = 0; i < intervalos.length; i++){
+      acc += frec[i]; F.push(acc); fr.push(frec[i]/n); Fr.push(acc/n);
+    }
+    return { datos, intervalos, marca, frec, F, fr, Fr, n };
+  },
+  montar(cont){
+    const d = this.generar(), FASES = this.FASES;
+    let faseActual = 0, bloqueado = false;
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono" id="n2Ico">🎯</div>
+        <div class="mision-texto"><h3 id="n2Titulo"></h3><p id="n2Texto"></p></div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card">
+            <h3>📏 Estaturas (cm)</h3>
+            <p class="ayuda">30 estaturas de estudiantes.</p>
+            <div class="chips" id="n2Datos" style="max-height:170px; overflow:auto;"></div>
+          </div>
+          <div class="card"><h3>🎯 Avance</h3><div class="fases" id="n2Fases"></div></div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>Marca</b> = (Linf+Lsup)/2</li>
+              <li><b>f</b> = datos en intervalo.</li>
+              <li><b>F</b> = acumulada.</li>
+              <li><b>fr</b> = f/n · <b>Fr</b> = F/n</li>
+            </ul>
+            <p class="ayuda">n = 30</p>
+          </details>
+        </aside>
+        <section class="card">
+          <h3>🧾 Tabla de frecuencias agrupadas</h3>
+          <div class="tabla-caja">
+            <table>
+              <thead><tr><th>Intervalo</th><th>x<sub>i</sub></th><th>f</th><th>F</th><th>fr</th><th>Fr</th></tr></thead>
+              <tbody id="n2Cuerpo"></tbody>
+              <tfoot><tr><td>Total</td><td>—</td><td>30</td><td>—</td><td>1</td><td>—</td></tr></tfoot>
+            </table>
+          </div>
+          <p class="ayuda nota">Intervalos semiabiertos [L<sub>inf</sub>, L<sub>sup</sub>[</p>
+        </section>
+      </div>`;
+
+    $('#n2Datos').innerHTML = d.datos.slice().sort((a,b)=>a-b)
+      .map(v => `<span class="chip">${v}</span>`).join('');
+
+    const celdaHTML = (col, fila) => `
+      <div class="celda">
+        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
+               data-col="${col}" data-fila="${fila}" ${col > faseActual ? 'disabled' : ''}>
+        <span class="marca"></span>
+      </div>`;
+    const render = () => {
+      $('#n2Cuerpo').innerHTML = d.intervalos.map((iv,i) => `
+        <tr>
+          <td style="font-size:.85rem">[${iv.inf}, ${iv.sup}[</td>
+          <td>${celdaHTML(0,i)}</td><td>${celdaHTML(1,i)}</td>
+          <td>${celdaHTML(2,i)}</td><td>${celdaHTML(3,i)}</td><td>${celdaHTML(4,i)}</td>
+        </tr>`).join('');
+    };
+    const actualizarMision = () => {
+      const f = FASES[faseActual];
+      $('#n2Ico').textContent = f.icono;
+      $('#n2Titulo').textContent = f.titulo;
+      $('#n2Texto').innerHTML = f.texto;
+    };
+    const actualizarProgreso = () => {
+      $('#n2Fases').innerHTML = FASES.map((f,i) => {
+        let c = 'fase-pill', ico = '🔒';
+        if(i < faseActual){ c += ' hecha'; ico = '✔'; }
+        else if(i === faseActual){ c += ' activa'; ico = '▶'; }
+        return `<div class="${c}"><span class="ico">${ico}</span><span>${f.etiqueta}</span></div>`;
+      }).join('');
+    };
+    const comparar = (col, fila, bruto) => {
+      const n = parseNum(bruto);
+      if(!Number.isFinite(n)) return false;
+      switch(col){
+        case 0: return n === d.marca[fila];
+        case 1: return n === d.frec[fila];
+        case 2: return n === d.F[fila];
+        case 3: return casi(n, d.fr[fila]);
+        case 4: return casi(n, d.Fr[fila]);
+      }
+      return false;
+    };
+    const validar = (inp, silencioso) => {
+      if(bloqueado || !inp || inp.readOnly || inp.disabled) return;
+      const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+      if(col !== faseActual) return;
+      const marca = inp.parentElement.querySelector('.marca');
+      const bruto = inp.value.trim();
+      if(bruto === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      if(comparar(col, fila, bruto)){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisarFase();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisarFase = () => {
+      const total = d.intervalos.length;
+      const ok = $$(`#n2Cuerpo input[data-col="${faseActual}"]`).filter(i => i.dataset.ok === '1').length;
+      if(ok < total) return;
+      bloqueado = true;
+      const etiqueta = FASES[faseActual].etiqueta;
+      setTimeout(() => {
+        if(faseActual === FASES.length - 1){
+          completarNivel(2, segundosActuales, erroresNivel);
+        } else {
+          faseActual++;
+          $$(`#n2Cuerpo input[data-col="${faseActual}"]`).forEach(inp => {
+            inp.disabled = false; inp.classList.add('nueva');
+            setTimeout(() => inp.classList.remove('nueva'), 1900);
+          });
+          const p = $(`#n2Cuerpo input[data-col="${faseActual}"]`);
+          if(p) p.focus({preventScroll:true});
+          actualizarMision(); actualizarProgreso();
+          sonidos.fase();
+          toast(`¡Columna <b>${etiqueta}</b> completada!`);
+          bloqueado = false;
+        }
+      }, 550);
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault();
+        validar(e.target);
+        if(e.target.readOnly){
+          const s = $$(`#n2Cuerpo input[data-col="${e.target.dataset.col}"]`).find(i => !i.readOnly && !i.disabled);
+          if(s) s.focus({preventScroll:true});
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => { if(e.target.tagName === 'INPUT') validar(e.target); });
+
+    $('#btnAyuda').onclick = () => {
+      const inputs = $$(`#n2Cuerpo input[data-col="${faseActual}"]`).filter(i => !i.readOnly);
+      if(!inputs.length){ toast('No hay más casillas.'); return; }
+      const inp = inputs[0];
+      const fila = Number(inp.dataset.fila);
+      const relleno = [d.marca, d.frec, d.F, d.fr, d.Fr];
+      inp.value = relleno[faseActual][fila];
+      validar(inp, true); sumarError();
+      toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Modo profesor: revelar solución. ¿Continuar?')) return;
+      bloqueado = true;
+      const relleno = [d.marca, d.frec, d.F, d.fr, d.Fr];
+      for(let col = 0; col < 5; col++){
+        $$(`#n2Cuerpo input[data-col="${col}"]`).forEach(inp => {
+          const fila = Number(inp.dataset.fila);
+          inp.disabled = false; inp.value = relleno[col][fila];
+          inp.classList.add('bien'); inp.readOnly = true;
+          const m = inp.parentElement.querySelector('.marca');
+          m.textContent = '✔'; m.className = 'marca ok';
+        });
+      }
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(2, segundosActuales, 99), 800);
+    };
+    render(); actualizarMision(); actualizarProgreso();
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 3   ========================
+   ========================================================= */
+const Nivel3 = {
+  generar(){
+    const rng = mulberry32(seedFor(1));
+    const pat = Nivel1.PATRONES[Math.floor(rng() * Nivel1.PATRONES.length)];
+    const k = pat.length;
+    const universo = [0,1,2,3,4,5,6,7,8,9];
+    const valores = shuffle(universo.slice(), rng).slice(0, k).sort((a,b)=>a-b);
+    const frec = pat.slice();
+    const maxF = Math.max(...frec);
+    if(frec.filter(f => f === maxF).length > 1){
+      const pm = frec.indexOf(maxF); frec[pm]++;
+      for(let i = frec.length - 1; i >= 0; i--){ if(i !== pm && frec[i] > 0){ frec[i]--; break; } }
+    }
+    const n = frec.reduce((s,f) => s+f, 0);
+    const suma = valores.reduce((s,v,i) => s + v*frec[i], 0);
+    const media = suma / n;
+    const ordenados = [];
+    valores.forEach((v,i) => { for(let j=0;j<frec[i];j++) ordenados.push(v); });
+    ordenados.sort((a,b) => a-b);
+    let mediana;
+    if(n % 2 === 0) mediana = (ordenados[n/2-1] + ordenados[n/2]) / 2;
+    else mediana = ordenados[Math.floor(n/2)];
+    const maxFFinal = Math.max(...frec);
+    const moda = valores[frec.indexOf(maxFFinal)];
+    return { valores, frec, n, media, mediana, moda };
+  },
+  montar(cont){
+    const d = this.generar();
+    let aciertos = 0;
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">📊</div>
+        <div class="mision-texto">
+          <h3>Nivel 3 · Medidas de tendencia central</h3>
+          <p>Calcula media, mediana y moda.</p>
+        </div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card">
+            <h3>🧾 Tabla base</h3>
+            <div class="tabla-caja" style="max-height:340px">
+              <table>
+                <thead><tr><th>Dato</th><th>f</th><th>F</th></tr></thead>
+                <tbody id="n3Cuerpo"></tbody>
+              </table>
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>Media</b> = Σ(x·f) ÷ n</li>
+              <li><b>Mediana</b> = valor central.</li>
+              <li><b>Moda</b> = mayor frecuencia.</li>
+            </ul>
+          </details>
+        </aside>
+        <section class="card">
+          <h3>🎯 Calcula las medidas</h3>
+          <div class="medidas-grid">
+            <div class="medida-card"><h4>📊 Media</h4><p>Σ(x·f) ÷ n</p>
+              <div class="campo-medida"><input type="text" inputmode="decimal" data-correcto="${d.media}"><span class="marca"></span></div>
+            </div>
+            <div class="medida-card"><h4>📈 Mediana</h4><p>Valor central.</p>
+              <div class="campo-medida"><input type="text" inputmode="decimal" data-correcto="${d.mediana}"><span class="marca"></span></div>
+            </div>
+            <div class="medida-card"><h4>👑 Moda</h4><p>Dato más repetido.</p>
+              <div class="campo-medida"><input type="text" inputmode="decimal" data-correcto="${d.moda}"><span class="marca"></span></div>
+            </div>
+          </div>
+        </section>
+      </div>`;
+
+    let acc = 0;
+    $('#n3Cuerpo').innerHTML = d.valores.map((v,i) => {
+      acc += d.frec[i];
+      return `<tr><td>${v}</td><td>${d.frec[i]}</td><td>${acc}</td></tr>`;
+    }).join('') + `<tr style="font-weight:800; background:var(--tabla-head)"><td>Total</td><td>${d.n}</td><td>—</td></tr>`;
+
+    let bloqueado = false;
+    const inputs = $$('.medida-card input');
+    inputs.forEach(inp => {
+      const validar = () => {
+        if(bloqueado) return;
+        const correcto = parseFloat(inp.dataset.correcto);
+        const v = parseNum(inp.value);
+        const marca = inp.parentElement.querySelector('.marca');
+        if(inp.value.trim() === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+        const ok = casi(v, correcto) || Math.abs(v - correcto) < 0.005;
+        if(ok){
+          inp.classList.remove('mal'); inp.classList.add('bien');
+          inp.readOnly = true;
+          marca.textContent = '✔'; marca.className = 'marca ok';
+          sonidos.correcto(); aciertos++;
+          if(aciertos === 3) setTimeout(() => completarNivel(3, segundosActuales, erroresNivel), 500);
+        } else {
+          inp.classList.remove('bien'); inp.classList.add('mal');
+          marca.textContent = '✖'; marca.className = 'marca error';
+          inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+          sonidos.error(); sumarError();
+        }
+      };
+      inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); validar(); } });
+      inp.addEventListener('focusout', validar);
+      inp.addEventListener('input', () => {
+        if(inp.readOnly) return;
+        inp.classList.remove('mal');
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = ''; m.className = 'marca';
+      });
+    });
+    $('#btnAyuda').onclick = () => {
+      const inp = inputs.find(i => !i.readOnly);
+      if(!inp){ toast('Todas correctas.'); return; }
+      inp.value = inp.dataset.correcto;
+      inp.dispatchEvent(new Event('focusout'));
+      sumarError(); toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar las 3 respuestas. ¿Continuar?')) return;
+      bloqueado = true;
+      inputs.forEach(inp => {
+        inp.value = inp.dataset.correcto;
+        inp.classList.add('bien'); inp.readOnly = true;
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(3, segundosActuales, 99), 800);
+    };
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 4   ========================
+   ========================================================= */
+const Nivel4 = {
+  generar(){
+    const rng = mulberry32(seedFor(4));
+    const k = 4 + Math.floor(rng() * 3);
+    const universo = [0,1,2,3,4,5,6,7,8,9];
+    const valores = shuffle(universo.slice(), rng).slice(0, k).sort((a,b)=>a-b);
+    let frec, intentos = 0;
+    do {
+      intentos++;
+      frec = new Array(k).fill(1);
+      let restante = 20 - k;
+      while(restante > 0){
+        const i = Math.floor(rng() * k);
+        if(frec[i] < 6){ frec[i]++; restante--; }
+      }
+    } while(intentos < 40 && new Set(frec).size < 3);
+    const n = frec.reduce((s,f)=>s+f, 0);
+    const frPct = frec.map(f => (f/n)*100);
+    return { valores, frec, frPct, n };
+  },
+  montar(cont){
+    const d = this.generar();
+    const k = d.valores.length;
+    const maxF = Math.max(...d.frec);
+    const yMax = Math.max(6, Math.ceil(maxF/2)*2);
+    const W = 620, H = 340;
+    const M = { top:30, right:30, bottom:55, left:52 };
+    const areaW = W - M.left - M.right;
+    const areaH = H - M.top - M.bottom;
+    const anchoBarra = Math.min(72, (areaW/k)*0.62);
+    const gap = (areaW - anchoBarra*k)/(k+1);
+    const valorToY = v => M.top + areaH - (v/yMax)*areaH;
+    const colores = ['#4338ca','#0ea5e9','#10b981','#f59e0b','#ec4899','#8b5cf6'];
+
+    const grid = [];
+    for(let i = 0; i <= yMax; i++){
+      const y = valorToY(i);
+      grid.push(`<line x1="${M.left}" y1="${y}" x2="${M.left+areaW}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3 3"/>`);
+      grid.push(`<text x="${M.left-10}" y="${y+4}" text-anchor="end" font-size="12" font-weight="700" fill="#64748b">${i}</text>`);
+    }
+    const barras = d.valores.map((v,i) => {
+      const x = M.left + gap + i*(anchoBarra+gap);
+      const y = valorToY(d.frec[i]);
+      const h = M.top + areaH - y;
+      return `<rect x="${x}" y="${y}" width="${anchoBarra}" height="${h}" fill="${colores[i%colores.length]}" rx="5"/>
+              <text x="${x+anchoBarra/2}" y="${M.top+areaH+24}" text-anchor="middle" font-size="15" font-weight="800" fill="#1e293b">${v}</text>`;
+    }).join('');
+    const svg = `<svg viewBox="0 0 ${W} ${H}" style="max-width:100%; height:auto">
+      ${grid.join('')}
+      <line x1="${M.left}" y1="${M.top+areaH}" x2="${M.left+areaW}" y2="${M.top+areaH}" stroke="#64748b" stroke-width="2"/>
+      <line x1="${M.left}" y1="${M.top}" x2="${M.left}" y2="${M.top+areaH}" stroke="#64748b" stroke-width="2"/>
+      <text x="${M.left+areaW/2}" y="${H-8}" text-anchor="middle" font-size="13" font-weight="700" fill="#64748b">Valor</text>
+      <text x="16" y="${M.top+areaH/2}" text-anchor="middle" font-size="13" font-weight="700" fill="#64748b" transform="rotate(-90 16 ${M.top+areaH/2})">Frecuencia absoluta</text>
+      ${barras}</svg>`;
+
+    const filas = d.valores.map((v,i) => `
+      <tr><td><b>${v}</b></td>
+        <td><div class="celda"><input type="text" inputmode="numeric" data-col="0" data-fila="${i}"><span class="marca"></span></div></td>
+        <td><div class="celda"><input type="text" inputmode="decimal" data-col="1" data-fila="${i}" placeholder="%"><span class="marca"></span></div></td>
+      </tr>`).join('');
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">📊</div>
+        <div class="mision-texto">
+          <h3>Nivel 4 · Lee el gráfico y completa la tabla</h3>
+          <p>Observa el gráfico de barras. Completa la <b>frecuencia absoluta (f)</b> y la <b>frecuencia relativa porcentual (fr %)</b>. La suma de <b>f</b> debe ser <b>20</b> y la de <b>fr %</b> debe ser <b>100 %</b>.</p>
+        </div>
+      </div>
+      <div class="nivel-layout" style="grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)">
+        <section class="card">
+          <h3>📈 Gráfico de barras</h3>
+          <div class="grafico-caja" style="background:var(--card); border-color:var(--borde); padding:10px">${svg}</div>
+        </section>
+        <aside>
+          <div class="card">
+            <h3>🧾 Tabla de frecuencias</h3>
+            <div class="tabla-caja">
+              <table style="min-width:0">
+                <thead><tr><th>Dato</th><th>f</th><th>fr (%)</th></tr></thead>
+                <tbody id="n4Cuerpo">${filas}</tbody>
+                <tfoot><tr><td>Total</td><td>20</td><td>100 %</td></tr></tfoot>
+              </table>
+            </div>
+            <p class="ayuda nota">Presiona <kbd>Enter</kbd> o haz clic fuera. <b style="color:#16a34a">✔</b> / <b style="color:#dc2626">✖</b></p>
+          </div>
+          <div class="card">
+            <h3>🎯 Avance</h3>
+            <div class="fases">
+              <div class="fase-pill activa" id="n4PillF"><span class="ico">▶</span><span>Frecuencia absoluta</span></div>
+              <div class="fase-pill" id="n4PillPct"><span class="ico">🔒</span><span>Frecuencia relativa (%)</span></div>
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>f</b> = altura de la barra.</li>
+              <li><b>fr %</b> = (f ÷ n) × 100.</li>
+              <li>Σ f = 20 · Σ fr % = 100</li>
+            </ul>
+          </details>
+        </aside>
+      </div>`;
+
+    let bloqueado = false;
+    const actualizarProgreso = () => {
+      const okF = $$('#n4Cuerpo input[data-col="0"]').every(i => i.dataset.ok === '1');
+      const okPct = $$('#n4Cuerpo input[data-col="1"]').every(i => i.dataset.ok === '1');
+      const pillF = $('#n4PillF'), pillP = $('#n4PillPct');
+      pillF.className = 'fase-pill ' + (okF ? 'hecha' : 'activa');
+      pillF.querySelector('.ico').textContent = okF ? '✔' : '▶';
+      if(okF){
+        pillP.className = 'fase-pill ' + (okPct ? 'hecha' : 'activa');
+        pillP.querySelector('.ico').textContent = okPct ? '✔' : '▶';
+      } else {
+        pillP.className = 'fase-pill';
+        pillP.querySelector('.ico').textContent = '🔒';
+      }
+    };
+    const revisar = () => {
+      actualizarProgreso();
+      const total = d.valores.length * 2;
+      const ok = $$('#n4Cuerpo input').filter(i => i.dataset.ok === '1').length;
+      if(ok === total && !bloqueado){
+        bloqueado = true;
+        setTimeout(() => completarNivel(4, segundosActuales, erroresNivel), 700);
+      }
+    };
+    const validar = (inp, silencioso) => {
+      if(bloqueado || !inp || inp.readOnly) return;
+      const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+      const marca = inp.parentElement.querySelector('.marca');
+      const bruto = inp.value.trim();
+      if(bruto === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      const n = parseNum(bruto);
+      let ok = false;
+      if(Number.isFinite(n)){
+        if(col === 0) ok = n === d.frec[fila];
+        if(col === 1) ok = Math.abs(n - d.frPct[fila]) < 0.5;
+      }
+      if(ok){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisar();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault(); validar(e.target);
+        if(e.target.readOnly){
+          const s = $$(`#n4Cuerpo input[data-col="${e.target.dataset.col}"]`).find(i => !i.readOnly);
+          if(s) s.focus({preventScroll:true});
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => { if(e.target.tagName === 'INPUT') validar(e.target); });
+
+    $('#btnAyuda').onclick = () => {
+      const inp = $$('#n4Cuerpo input').find(i => !i.readOnly);
+      if(!inp){ toast('Todas correctas.'); return; }
+      const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+      inp.value = col === 0 ? d.frec[fila] : d.frPct[fila];
+      validar(inp, true); sumarError(); toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar tabla completa. ¿Continuar?')) return;
+      bloqueado = true;
+      $$('#n4Cuerpo input').forEach(inp => {
+        const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+        inp.value = col === 0 ? d.frec[fila] : d.frPct[fila];
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      actualizarProgreso();
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(4, segundosActuales, 99), 900);
+    };
+    actualizarProgreso();
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 5   ========================
+   ========================================================= */
+const Nivel5 = {
+  DISTRIBUCIONES: [[18,14,9,6,3],[20,13,8,6,3],[15,17,10,5,3],[22,12,8,5,3],[17,15,10,5,3],[19,14,9,5,3],[16,16,10,5,3]],
+  CATEGORIAS: [
+    { nombre:'Muy satisfecho',   color:'#059669' },
+    { nombre:'Satisfecho',       color:'#10b981' },
+    { nombre:'Neutral',          color:'#fbbf24' },
+    { nombre:'Insatisfecho',     color:'#f97316' },
+    { nombre:'Muy insatisfecho', color:'#dc2626' }
+  ],
+  N: 50,
+  generar(){
+    const rng = mulberry32(seedFor(5));
+    const dist = this.DISTRIBUCIONES[Math.floor(rng() * this.DISTRIBUCIONES.length)];
+    return this.CATEGORIAS.map((c,i) => ({ nombre: c.nombre, color: c.color, f: dist[i] }));
+  },
+  normalizar(s){
+    return String(s).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+  },
+  montar(cont){
+    const cats = this.generar();
+    const N = this.N;
+    const norm = this.normalizar.bind(this);
+
+    const cx = 220, cy = 215, r = 140;
+    let angulo = -Math.PI/2;
+    const sectores = cats.map(c => {
+      const frac = c.f/N;
+      const inicio = angulo, fin = angulo + frac*Math.PI*2;
+      angulo = fin;
+      const x1 = cx + r*Math.cos(inicio), y1 = cy + r*Math.sin(inicio);
+      const x2 = cx + r*Math.cos(fin), y2 = cy + r*Math.sin(fin);
+      const largo = (fin - inicio) > Math.PI ? 1 : 0;
+      const path = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largo} 1 ${x2} ${y2} Z`;
+      const medio = (inicio + fin)/2;
+      const lx = cx + r*0.62*Math.cos(medio), ly = cy + r*0.62*Math.sin(medio);
+      const pct = Math.round(frac*100);
+      return `<path d="${path}" fill="${c.color}" stroke="#fff" stroke-width="2.5"/>
+              <text x="${lx}" y="${ly+5}" text-anchor="middle" font-size="17" font-weight="900" fill="#fff" style="paint-order:stroke; stroke:rgba(0,0,0,.15); stroke-width:1.5">${pct}%</text>`;
+    }).join('');
+    const svg = `<svg viewBox="0 0 440 440" style="max-width:100%; height:auto">${sectores}
+      <circle cx="${cx}" cy="${cy}" r="58" fill="var(--card)" stroke="var(--borde)" stroke-width="1.5"/>
+      <text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--texto-suave)">Total</text>
+      <text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="22" font-weight="900" fill="var(--texto)">${N}</text></svg>`;
+    const leyenda = cats.map(c => `
+      <div style="display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:700; color:var(--texto)">
+        <span style="display:inline-block; width:14px; height:14px; border-radius:4px; background:${c.color}; flex-shrink:0"></span>
+        <span>${c.nombre}</span>
+      </div>`).join('');
+    const filas = cats.map((c,i) => `
+      <tr><td><div class="celda"><input type="text" data-col="0" data-fila="${i}" placeholder="Categoría"><span class="marca"></span></div></td>
+        <td><div class="celda"><input type="text" inputmode="numeric" data-col="1" data-fila="${i}" disabled><span class="marca"></span></div></td>
+      </tr>`).join('');
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">📮</div>
+        <div class="mision-texto">
+          <h3>Nivel 5 · Encuesta de satisfacción</h3>
+          <p>Se encuestó a <b>50 personas</b>. <b>Fase 1:</b> escribe las categorías en <b>Datos</b> según el orden del gráfico. <b>Fase 2:</b> completa la <b>f</b> usando los porcentajes.</p>
+        </div>
+      </div>
+      <div class="nivel-layout" style="grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)">
+        <section class="card">
+          <h3>🥧 Nivel de satisfacción</h3>
+          <div style="text-align:center">${svg}</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px">${leyenda}</div>
+          <p class="ayuda nota">Total: <b>50 personas</b> = <b>100 %</b>.</p>
+        </section>
+        <aside>
+          <div class="card">
+            <h3>🧾 Tabla de frecuencias</h3>
+            <div class="tabla-caja">
+              <table style="min-width:0">
+                <thead><tr><th>Datos</th><th>f</th></tr></thead>
+                <tbody id="n5Cuerpo">${filas}</tbody>
+                <tfoot><tr><td>Total</td><td>50</td></tr></tfoot>
+              </table>
+            </div>
+            <p class="ayuda nota">Presiona <kbd>Enter</kbd> o haz clic fuera.</p>
+          </div>
+          <div class="card">
+            <h3>🎯 Avance</h3>
+            <div class="fases">
+              <div class="fase-pill activa" id="n5PillD"><span class="ico">▶</span><span>Datos</span></div>
+              <div class="fase-pill" id="n5PillF"><span class="ico">🔒</span><span>f</span></div>
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li>100 % = 50 personas.</li>
+              <li><b>f</b> = (porcentaje × 50) ÷ 100.</li>
+            </ul>
+          </details>
+        </aside>
+      </div>`;
+
+    let faseActual = 0, bloqueado = false;
+    const actualizarPills = () => {
+      const okD = $$('#n5Cuerpo input[data-col="0"]').every(i => i.dataset.ok === '1');
+      const okF = $$('#n5Cuerpo input[data-col="1"]').every(i => i.dataset.ok === '1');
+      const pillD = $('#n5PillD'), pillF = $('#n5PillF');
+      pillD.className = 'fase-pill ' + (okD ? 'hecha' : 'activa');
+      pillD.querySelector('.ico').textContent = okD ? '✔' : '▶';
+      if(okD){
+        pillF.className = 'fase-pill ' + (okF ? 'hecha' : 'activa');
+        pillF.querySelector('.ico').textContent = okF ? '✔' : '▶';
+      } else {
+        pillF.className = 'fase-pill';
+        pillF.querySelector('.ico').textContent = '🔒';
+      }
+    };
+    const comparar = (col, fila, bruto) => {
+      if(col === 0) return norm(bruto) === norm(cats[fila].nombre);
+      if(col === 1){ const n = parseNum(bruto); return Number.isFinite(n) && n === cats[fila].f; }
+      return false;
+    };
+    const validar = (inp, silencioso) => {
+      if(bloqueado || !inp || inp.readOnly || inp.disabled) return;
+      const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+      if(col !== faseActual) return;
+      const marca = inp.parentElement.querySelector('.marca');
+      const bruto = inp.value.trim();
+      if(bruto === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      if(comparar(col, fila, bruto)){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisarFase();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisarFase = () => {
+      const total = cats.length;
+      const ok = $$(`#n5Cuerpo input[data-col="${faseActual}"]`).filter(i => i.dataset.ok === '1').length;
+      actualizarPills();
+      if(ok < total) return;
+      if(faseActual === 0){
+        bloqueado = true;
+        setTimeout(() => {
+          faseActual = 1;
+          $$('#n5Cuerpo input[data-col="1"]').forEach(inp => {
+            inp.disabled = false; inp.classList.add('nueva');
+            setTimeout(() => inp.classList.remove('nueva'), 1900);
+          });
+          const p = $('#n5Cuerpo input[data-col="1"]');
+          if(p) p.focus({preventScroll:true});
+          sonidos.fase();
+          toast('¡Columna <b>Datos</b> completada! Se desbloqueó <b>f</b>.');
+          bloqueado = false;
+          actualizarPills();
+        }, 550);
+      } else {
+        if(bloqueado) return;
+        bloqueado = true;
+        setTimeout(() => completarNivel(5, segundosActuales, erroresNivel), 700);
+      }
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault(); validar(e.target);
+        if(e.target.readOnly){
+          const s = $$(`#n5Cuerpo input[data-col="${e.target.dataset.col}"]`).find(i => !i.readOnly && !i.disabled);
+          if(s) s.focus({preventScroll:true});
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => { if(e.target.tagName === 'INPUT') validar(e.target); });
+
+    $('#btnAyuda').onclick = () => {
+      const inp = $$(`#n5Cuerpo input[data-col="${faseActual}"]`).find(i => !i.readOnly);
+      if(!inp){ toast('Todas correctas.'); return; }
+      const fila = Number(inp.dataset.fila);
+      inp.value = faseActual === 0 ? cats[fila].nombre : cats[fila].f;
+      validar(inp, true); sumarError(); toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar tabla completa. ¿Continuar?')) return;
+      bloqueado = true;
+      $$('#n5Cuerpo input').forEach(inp => {
+        const col = Number(inp.dataset.col), fila = Number(inp.dataset.fila);
+        inp.disabled = false;
+        inp.value = col === 0 ? cats[fila].nombre : cats[fila].f;
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      actualizarPills();
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(5, segundosActuales, 99), 900);
+    };
+    actualizarPills();
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 6   ========================
+   Ordenar + cuartiles + IQR
+   ========================================================= */
+const Nivel6 = {
+  generar(){
+    const rng = mulberry32(seedFor(6));
+    const n = 15;
+    const datos = [];
+    for(let i = 0; i < n; i++) datos.push(1 + Math.floor(rng() * 20));
+    const ordenados = [...datos].sort((a,b) => a-b);
+    return { datos, ordenados, ...calcularCuartiles(ordenados) };
+  },
+  montar(cont){
+    const d = this.generar();
+    let faseActual = 0, bloqueado = false;
+
+    const chipsHTML = d.datos.map(v => `<span class="chip">${v}</span>`).join('');
+    const celdasOrden = d.ordenados.map((_, i) => `
+      <div class="celda" style="display:inline-flex">
+        <input type="text" inputmode="numeric" data-orden="${i}" style="max-width:52px">
+        <span class="marca"></span>
+      </div>`).join('');
+
+    const CUARTS = [
+      { key:'min', label:'Valor mínimo', ico:'⬇️' },
+      { key:'q1',  label:'Cuartil 1 (Q₁)', ico:'1️⃣' },
+      { key:'q2',  label:'Cuartil 2 (Q₂ = Mediana)', ico:'2️⃣' },
+      { key:'q3',  label:'Cuartil 3 (Q₃)', ico:'3️⃣' },
+      { key:'max', label:'Valor máximo', ico:'⬆️' },
+      { key:'iqr', label:'Rango intercuartil (Q₃ − Q₁)', ico:'📏' }
+    ];
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">🔢</div>
+        <div class="mision-texto">
+          <h3>Nivel 6 · Ordena y calcula cuartiles + IQR</h3>
+          <p><b>Fase 1:</b> ordena los 15 datos de menor a mayor.<br>
+             <b>Fase 2:</b> calcula mínimo, máximo, Q₁, Q₂, Q₃ y el <b>rango intercuartil (Q₃ − Q₁)</b>.</p>
+        </div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card"><h3>📋 Datos sin ordenar</h3><div class="chips">${chipsHTML}</div></div>
+          <div class="card">
+            <h3>🎯 Avance</h3>
+            <div class="fases">
+              <div class="fase-pill activa" id="n6Pill1"><span class="ico">▶</span><span>Ordenar datos</span></div>
+              <div class="fase-pill" id="n6Pill2"><span class="ico">🔒</span><span>Cuartiles + IQR</span></div>
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>Q₂</b> = mediana.</li>
+              <li><b>Q₁</b> = mediana de la mitad inferior.</li>
+              <li><b>Q₃</b> = mediana de la mitad superior.</li>
+              <li><b>IQR = Q₃ − Q₁</b></li>
+            </ul>
+          </details>
+        </aside>
+        <section>
+          <div class="card">
+            <h3>✍️ Fase 1 · Ordena los datos</h3>
+            <p class="ayuda">Escribe los 15 datos en orden creciente, uno por casilla.</p>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px">${celdasOrden}</div>
+          </div>
+          <div class="card">
+            <h3>📐 Fase 2 · Medidas y cuartiles</h3>
+            <div class="medidas-grid">
+              ${CUARTS.map(c => `
+                <div class="medida-card">
+                  <h4>${c.ico} ${c.label}</h4>
+                  <div class="celda">
+                    <input type="text" inputmode="decimal" data-cuart="${c.key}" disabled>
+                    <span class="marca"></span>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </section>
+      </div>`;
+
+    const validarOrden = (inp, silencioso) => {
+      if(bloqueado || inp.readOnly) return;
+      const i = Number(inp.dataset.orden);
+      const marca = inp.parentElement.querySelector('.marca');
+      if(inp.value.trim() === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      const v = parseNum(inp.value);
+      if(v === d.ordenados[i]){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisarOrden();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisarOrden = () => {
+      const inputs = $$('[data-orden]');
+      const ok = inputs.filter(i => i.dataset.ok === '1').length;
+      if(ok === d.ordenados.length && faseActual === 0){
+        bloqueado = true;
+        setTimeout(() => {
+          faseActual = 1;
+          $$('[data-cuart]').forEach(inp => {
+            inp.disabled = false; inp.classList.add('nueva');
+            setTimeout(() => inp.classList.remove('nueva'), 1900);
+          });
+          const p = $('[data-cuart]'); if(p) p.focus({preventScroll:true});
+          sonidos.fase();
+          $('#n6Pill1').className = 'fase-pill hecha';
+          $('#n6Pill1').querySelector('.ico').textContent = '✔';
+          $('#n6Pill2').className = 'fase-pill activa';
+          $('#n6Pill2').querySelector('.ico').textContent = '▶';
+          toast('¡Datos ordenados! Ahora calcula cuartiles e IQR.');
+          bloqueado = false;
+        }, 550);
+      }
+    };
+    const validarCuart = (inp, silencioso) => {
+      if(bloqueado || inp.readOnly || faseActual !== 1) return;
+      const correcto = d[inp.dataset.cuart];
+      const marca = inp.parentElement.querySelector('.marca');
+      if(inp.value.trim() === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      const v = parseNum(inp.value);
+      if(casi(v, correcto)){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisarCuart();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisarCuart = () => {
+      const inputs = $$('[data-cuart]');
+      const ok = inputs.filter(i => i.dataset.ok === '1').length;
+      if(ok === inputs.length && !bloqueado){
+        bloqueado = true;
+        setTimeout(() => completarNivel(6, segundosActuales, erroresNivel), 700);
+      }
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault();
+        if(e.target.dataset.orden !== undefined){
+          validarOrden(e.target);
+          if(e.target.readOnly){
+            const s = $$('[data-orden]').find(i => !i.readOnly);
+            if(s) s.focus({preventScroll:true});
+          }
+        } else if(e.target.dataset.cuart){
+          validarCuart(e.target);
+          if(e.target.readOnly){
+            const s = $$('[data-cuart]').find(i => !i.readOnly && !i.disabled);
+            if(s) s.focus({preventScroll:true});
+          }
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => {
+      if(e.target.tagName !== 'INPUT') return;
+      if(e.target.dataset.orden !== undefined) validarOrden(e.target);
+      else if(e.target.dataset.cuart) validarCuart(e.target);
+    });
+    $('#btnAyuda').onclick = () => {
+      if(faseActual === 0){
+        const inp = $$('[data-orden]').find(i => !i.readOnly);
+        if(!inp){ toast('Todos ordenados.'); return; }
+        inp.value = d.ordenados[Number(inp.dataset.orden)];
+        validarOrden(inp, true);
+      } else {
+        const inp = $$('[data-cuart]').find(i => !i.readOnly);
+        if(!inp){ toast('Todo completo.'); return; }
+        inp.value = d[inp.dataset.cuart];
+        validarCuart(inp, true);
+      }
+      sumarError(); toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar solución completa. ¿Continuar?')) return;
+      bloqueado = true;
+      $$('[data-orden]').forEach(inp => {
+        inp.value = d.ordenados[Number(inp.dataset.orden)];
+        inp.classList.add('bien'); inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      $$('[data-cuart]').forEach(inp => {
+        inp.disabled = false;
+        inp.value = d[inp.dataset.cuart];
+        inp.classList.add('bien'); inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(6, segundosActuales, 99), 900);
+    };
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 7   ========================
+   Cuartiles + IQR desde tabla
+   ========================================================= */
+const Nivel7 = {
+  generar(){
+    const rng = mulberry32(seedFor(7));
+    const k = 5 + Math.floor(rng() * 3);
+    const universo = [1,2,3,4,5,6,7,8,9,10];
+    const valores = shuffle(universo.slice(), rng).slice(0, k).sort((a,b)=>a-b);
+    const frec = valores.map(() => 1 + Math.floor(rng() * 5));
+    const expandido = [];
+    valores.forEach((v,i) => { for(let j=0;j<frec[i];j++) expandido.push(v); });
+    const F = []; let acc = 0;
+    frec.forEach(f => { acc += f; F.push(acc); });
+    return { valores, frec, F, n: acc, expandido, ...calcularCuartiles(expandido) };
+  },
+  montar(cont){
+    const d = this.generar();
+    let bloqueado = false;
+    const CUARTS = [
+      { key:'min', label:'Valor mínimo', ico:'⬇️' },
+      { key:'q1',  label:'Cuartil 1 (Q₁)', ico:'1️⃣' },
+      { key:'q2',  label:'Cuartil 2 (Q₂)', ico:'2️⃣' },
+      { key:'q3',  label:'Cuartil 3 (Q₃)', ico:'3️⃣' },
+      { key:'max', label:'Valor máximo', ico:'⬆️' },
+      { key:'iqr', label:'Rango intercuartil (Q₃ − Q₁)', ico:'📏' }
+    ];
+    const filas = d.valores.map((v,i) => `<tr><td><b>${v}</b></td><td>${d.frec[i]}</td><td>${d.F[i]}</td></tr>`).join('');
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">📉</div>
+        <div class="mision-texto">
+          <h3>Nivel 7 · Cuartiles + IQR desde una tabla</h3>
+          <p>Usa la columna <b>F</b> para calcular las 5 medidas y el <b>rango intercuartil (Q₃ − Q₁)</b>. n = <b>${d.n}</b>.</p>
+        </div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card">
+            <h3>🧾 Tabla completa</h3>
+            <div class="tabla-caja">
+              <table>
+                <thead><tr><th>Dato</th><th>f</th><th>F</th></tr></thead>
+                <tbody>${filas}</tbody>
+                <tfoot><tr><td>Total</td><td>${d.n}</td><td>—</td></tr></tfoot>
+              </table>
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li>Localiza posiciones con F.</li>
+              <li><b>Q₂</b> = mediana.</li>
+              <li><b>Q₁</b>/<b>Q₃</b> = medianas de mitades.</li>
+              <li><b>IQR = Q₃ − Q₁</b></li>
+            </ul>
+          </details>
+        </aside>
+        <section class="card">
+          <h3>🎯 Encuentra las 6 medidas</h3>
+          <div class="medidas-grid">
+            ${CUARTS.map(c => `
+              <div class="medida-card">
+                <h4>${c.ico} ${c.label}</h4>
+                <div class="celda">
+                  <input type="text" inputmode="decimal" data-cuart="${c.key}">
+                  <span class="marca"></span>
+                </div>
+              </div>`).join('')}
+          </div>
+          <p class="ayuda nota">Presiona <kbd>Enter</kbd> o haz clic fuera.</p>
+        </section>
+      </div>`;
+
+    const validar = (inp, silencioso) => {
+      if(bloqueado || inp.readOnly) return;
+      const correcto = d[inp.dataset.cuart];
+      const marca = inp.parentElement.querySelector('.marca');
+      if(inp.value.trim() === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      const v = parseNum(inp.value);
+      if(casi(v, correcto)){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisar();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisar = () => {
+      const inputs = $$('[data-cuart]');
+      const ok = inputs.filter(i => i.dataset.ok === '1').length;
+      if(ok === inputs.length && !bloqueado){
+        bloqueado = true;
+        setTimeout(() => completarNivel(7, segundosActuales, erroresNivel), 700);
+      }
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault(); validar(e.target);
+        if(e.target.readOnly){
+          const s = $$('[data-cuart]').find(i => !i.readOnly);
+          if(s) s.focus({preventScroll:true});
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => { if(e.target.tagName === 'INPUT') validar(e.target); });
+
+    $('#btnAyuda').onclick = () => {
+      const inp = $$('[data-cuart]').find(i => !i.readOnly);
+      if(!inp){ toast('Todo completo.'); return; }
+      inp.value = d[inp.dataset.cuart];
+      validar(inp, true); sumarError(); toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar solución. ¿Continuar?')) return;
+      bloqueado = true;
+      $$('[data-cuart]').forEach(inp => {
+        inp.value = d[inp.dataset.cuart];
+        inp.classList.add('bien'); inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(7, segundosActuales, 99), 900);
+    };
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 8   ========================
+   Cuartiles + IQR desde gráfico
+   ========================================================= */
+const Nivel8 = {
+  generar(){
+    const rng = mulberry32(seedFor(8));
+    const k = 5 + Math.floor(rng() * 3);
+    const universo = [1,2,3,4,5,6,7,8,9,10];
+    const valores = shuffle(universo.slice(), rng).slice(0, k).sort((a,b)=>a-b);
+    const frec = valores.map(() => 1 + Math.floor(rng() * 5));
+    const expandido = [];
+    valores.forEach((v,i) => { for(let j=0;j<frec[i];j++) expandido.push(v); });
+    return { valores, frec, n: expandido.length, expandido, ...calcularCuartiles(expandido) };
+  },
+  montar(cont){
+    const d = this.generar();
+    let bloqueado = false;
+    const k = d.valores.length;
+    const maxF = Math.max(...d.frec);
+    const yMax = Math.max(4, Math.ceil(maxF/2)*2);
+    const W = 620, H = 340;
+    const M = { top:30, right:30, bottom:55, left:52 };
+    const areaW = W - M.left - M.right;
+    const areaH = H - M.top - M.bottom;
+    const anchoBarra = Math.min(66, (areaW/k)*0.6);
+    const gap = (areaW - anchoBarra*k)/(k+1);
+    const valorToY = v => M.top + areaH - (v/yMax)*areaH;
+    const colores = ['#4338ca','#0ea5e9','#10b981','#f59e0b','#ec4899','#8b5cf6','#ef4444'];
+
+    const grid = [];
+    for(let i = 0; i <= yMax; i++){
+      const y = valorToY(i);
+      grid.push(`<line x1="${M.left}" y1="${y}" x2="${M.left+areaW}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3 3"/>`);
+      grid.push(`<text x="${M.left-10}" y="${y+4}" text-anchor="end" font-size="12" font-weight="700" fill="#64748b">${i}</text>`);
+    }
+    const barras = d.valores.map((v,i) => {
+      const x = M.left + gap + i*(anchoBarra+gap);
+      const y = valorToY(d.frec[i]);
+      const h = M.top + areaH - y;
+      return `<rect x="${x}" y="${y}" width="${anchoBarra}" height="${h}" fill="${colores[i%colores.length]}" rx="5"/>
+              <text x="${x+anchoBarra/2}" y="${M.top+areaH+24}" text-anchor="middle" font-size="14" font-weight="800" fill="#1e293b">${v}</text>`;
+    }).join('');
+    const svg = `<svg viewBox="0 0 ${W} ${H}" style="max-width:100%; height:auto">
+      ${grid.join('')}
+      <line x1="${M.left}" y1="${M.top+areaH}" x2="${M.left+areaW}" y2="${M.top+areaH}" stroke="#64748b" stroke-width="2"/>
+      <line x1="${M.left}" y1="${M.top}" x2="${M.left}" y2="${M.top+areaH}" stroke="#64748b" stroke-width="2"/>
+      <text x="${M.left+areaW/2}" y="${H-8}" text-anchor="middle" font-size="13" font-weight="700" fill="#64748b">Valor</text>
+      <text x="16" y="${M.top+areaH/2}" text-anchor="middle" font-size="13" font-weight="700" fill="#64748b" transform="rotate(-90 16 ${M.top+areaH/2})">Frecuencia absoluta</text>
+      ${barras}</svg>`;
+
+    const CUARTS = [
+      { key:'min', label:'Valor mínimo', ico:'⬇️' },
+      { key:'q1',  label:'Cuartil 1 (Q₁)', ico:'1️⃣' },
+      { key:'q2',  label:'Cuartil 2 (Q₂)', ico:'2️⃣' },
+      { key:'q3',  label:'Cuartil 3 (Q₃)', ico:'3️⃣' },
+      { key:'max', label:'Valor máximo', ico:'⬆️' },
+      { key:'iqr', label:'Rango intercuartil (Q₃ − Q₁)', ico:'📏' }
+    ];
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">📊</div>
+        <div class="mision-texto">
+          <h3>Nivel 8 · Cuartiles + IQR desde un gráfico</h3>
+          <p>Cuenta los datos de cada barra. Luego calcula las 5 medidas y el <b>rango intercuartil</b>.</p>
+        </div>
+      </div>
+      <div class="nivel-layout" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+        <section class="card">
+          <h3>📊 Gráfico de barras</h3>
+          <div class="grafico-caja" style="background:var(--card); border-color:var(--borde); padding:10px">${svg}</div>
+        </section>
+        <aside>
+          <div class="card">
+            <h3>🎯 Encuentra las 6 medidas</h3>
+            <div class="medidas-grid" style="grid-template-columns:1fr">
+              ${CUARTS.map(c => `
+                <div class="medida-card" style="padding:12px">
+                  <h4>${c.ico} ${c.label}</h4>
+                  <div class="celda">
+                    <input type="text" inputmode="decimal" data-cuart="${c.key}">
+                    <span class="marca"></span>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li>Cuenta cada barra para la frecuencia.</li>
+              <li><b>Q₂</b> = mediana.</li>
+              <li><b>IQR = Q₃ − Q₁</b></li>
+            </ul>
+          </details>
+        </aside>
+      </div>`;
+
+    const validar = (inp, silencioso) => {
+      if(bloqueado || inp.readOnly) return;
+      const correcto = d[inp.dataset.cuart];
+      const marca = inp.parentElement.querySelector('.marca');
+      if(inp.value.trim() === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+      const v = parseNum(inp.value);
+      if(casi(v, correcto)){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+        revisar();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+    const revisar = () => {
+      const inputs = $$('[data-cuart]');
+      const ok = inputs.filter(i => i.dataset.ok === '1').length;
+      if(ok === inputs.length && !bloqueado){
+        bloqueado = true;
+        setTimeout(() => completarNivel(8, segundosActuales, erroresNivel), 700);
+      }
+    };
+    cont.addEventListener('input', e => {
+      if(e.target.tagName !== 'INPUT' || e.target.readOnly) return;
+      e.target.classList.remove('mal');
+      const m = e.target.parentElement.querySelector('.marca');
+      m.textContent = ''; m.className = 'marca';
+    });
+    cont.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT' && e.key === 'Enter'){
+        e.preventDefault(); validar(e.target);
+        if(e.target.readOnly){
+          const s = $$('[data-cuart]').find(i => !i.readOnly);
+          if(s) s.focus({preventScroll:true});
+        }
+      }
+    });
+    cont.addEventListener('focusout', e => { if(e.target.tagName === 'INPUT') validar(e.target); });
+
+    $('#btnAyuda').onclick = () => {
+      const inp = $$('[data-cuart]').find(i => !i.readOnly);
+      if(!inp){ toast('Todo completo.'); return; }
+      inp.value = d[inp.dataset.cuart];
+      validar(inp, true); sumarError(); toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar solución. ¿Continuar?')) return;
+      bloqueado = true;
+      $$('[data-cuart]').forEach(inp => {
+        inp.value = d[inp.dataset.cuart];
+        inp.classList.add('bien'); inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(8, segundosActuales, 99), 900);
+    };
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 9   ========================
+   Boxplot interactivo
+   ========================================================= */
+const Nivel9 = {
+  generar(){
+    const rng = mulberry32(seedFor(9));
+    const n = 15;
+    const datos = [];
+    for(let i = 0; i < n; i++) datos.push(2 + Math.floor(rng() * 18));
+    const ordenados = [...datos].sort((a,b) => a-b);
+    return { datos, ordenados, ...calcularCuartiles(ordenados) };
+  },
+  montar(cont){
+    const d = this.generar();
+    let bloqueado = false;
+    const W = 700, H = 240;
+    const M = { top:80, right:50, bottom:60, left:50 };
+    const areaW = W - M.left - M.right;
+    const ejeMin = Math.max(0, Math.floor(d.min) - 1);
+    const ejeMax = Math.ceil(d.max) + 1;
+    const rango = ejeMax - ejeMin;
+    const yLinea = M.top + 60;
+    const valToX = v => M.left + ((v - ejeMin) / rango) * areaW;
+    const xToVal = x => {
+      const raw = ejeMin + ((x - M.left) / areaW) * rango;
+      return Math.round(raw * 2) / 2;
+    };
+    const handles = [
+      { key:'min', label:'Mín', color:'#4338ca' },
+      { key:'q1',  label:'Q₁',  color:'#0ea5e9' },
+      { key:'q2',  label:'Q₂',  color:'#10b981' },
+      { key:'q3',  label:'Q₃',  color:'#f59e0b' },
+      { key:'max', label:'Máx', color:'#dc2626' }
+    ];
+    handles.forEach(h => h.val = ejeMin);
+    let arrastrando = -1;
+
+    const dibujar = () => {
+      const ticks = [];
+      for(let v = ejeMin; v <= ejeMax; v++){
+        const x = valToX(v);
+        ticks.push(`<line x1="${x}" y1="${yLinea}" x2="${x}" y2="${yLinea+8}" stroke="#64748b" stroke-width="1.5"/>`);
+        if((v - ejeMin) % 2 === 0){
+          ticks.push(`<text x="${x}" y="${yLinea+26}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--texto)">${v}</text>`);
+        }
+      }
+      const recta = `<line x1="${M.left}" y1="${yLinea}" x2="${M.left+areaW}" y2="${yLinea}" stroke="#64748b" stroke-width="2"/>`;
+      const xMin = valToX(handles[0].val), xQ1 = valToX(handles[1].val);
+      const xQ2 = valToX(handles[2].val), xQ3 = valToX(handles[3].val);
+      const xMax = valToX(handles[4].val);
+      const xs = [xMin, xQ1, xQ2, xQ3, xMax];
+      const xMinV = Math.min(...xs), xMaxV = Math.max(...xs);
+      const whiskers = `
+        <line x1="${xMinV}" y1="${yLinea}" x2="${Math.min(xQ1,xQ3)}" y2="${yLinea}" stroke="#4338ca" stroke-width="2"/>
+        <line x1="${Math.max(xQ1,xQ3)}" y1="${yLinea}" x2="${xMaxV}" y2="${yLinea}" stroke="#4338ca" stroke-width="2"/>
+        <line x1="${xMinV}" y1="${yLinea-14}" x2="${xMinV}" y2="${yLinea+14}" stroke="#4338ca" stroke-width="2.5"/>
+        <line x1="${xMaxV}" y1="${yLinea-14}" x2="${xMaxV}" y2="${yLinea+14}" stroke="#4338ca" stroke-width="2.5"/>`;
+      const box = `
+        <rect x="${Math.min(xQ1,xQ3)}" y="${yLinea-24}" width="${Math.max(2, Math.abs(xQ3-xQ1))}" height="48"
+              fill="rgba(79,70,229,.22)" stroke="#4338ca" stroke-width="2"/>
+        <line x1="${xQ2}" y1="${yLinea-24}" x2="${xQ2}" y2="${yLinea+24}" stroke="#dc2626" stroke-width="2.5"/>`;
+      const handlesHTML = handles.map((h,i) => {
+        const x = valToX(h.val);
+        return `<g class="handle9" data-idx="${i}" style="cursor:grab">
+          <line x1="${x}" y1="${M.top-20}" x2="${x}" y2="${yLinea}" stroke="${h.color}" stroke-width="2" stroke-dasharray="4 3" opacity=".6"/>
+          <circle cx="${x}" cy="${M.top-30}" r="20" fill="${h.color}" stroke="#fff" stroke-width="2.5"/>
+          <text x="${x}" y="${M.top-25}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">${h.label}</text>
+        </g>`;
+      }).join('');
+      return `<svg viewBox="0 0 ${W} ${H}" style="max-width:100%; height:auto; touch-action:none">
+        ${recta}${ticks.join('')}${whiskers}${box}${handlesHTML}</svg>`;
+    };
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">📦</div>
+        <div class="mision-texto">
+          <h3>Nivel 9 · Construye el boxplot</h3>
+          <p>Arrastra los 5 marcadores hasta su posición correcta. Presiona <b>Comprobar</b> cuando estén ubicados.</p>
+        </div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card">
+            <h3>📋 Muestra ordenada (n = 15)</h3>
+            <div class="chips">${d.ordenados.map(v => `<span class="chip">${v}</span>`).join('')}</div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>Mín</b> / <b>Máx</b> = extremos.</li>
+              <li><b>Q₂</b> = mediana.</li>
+              <li><b>Q₁</b>/<b>Q₃</b> = medianas de las mitades.</li>
+            </ul>
+          </details>
+        </aside>
+        <section class="card">
+          <h3>📦 Diagrama de caja</h3>
+          <div class="grafico-caja" id="n9Caja" style="background:var(--card); border-color:var(--borde); padding:10px">${dibujar()}</div>
+          <div style="display:flex; justify-content:space-around; gap:6px; margin-top:12px; flex-wrap:wrap; font-size:.85rem">
+            ${handles.map(h => `<div class="valor-barra" data-idx="${h.key}" style="min-width:80px">${h.label}: <b>${h.val}</b></div>`).join('')}
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap">
+            <button class="btn" id="n9Comprobar">✔ Comprobar</button>
+            <button class="btn ghost" id="n9Limpiar">↺ Reiniciar marcadores</button>
+          </div>
+        </section>
+      </div>`;
+
+    const caja = $('#n9Caja');
+    const actualizarValores = () => {
+      handles.forEach(h => {
+        const el = cont.querySelector(`.valor-barra[data-idx="${h.key}"] b`);
+        if(el) el.textContent = h.val;
+      });
+    };
+    const redibujar = () => { caja.innerHTML = dibujar(); actualizarValores(); };
+    const getSVGx = clientX => {
+      const svg = caja.querySelector('svg');
+      const rect = svg.getBoundingClientRect();
+      const escala = W / rect.width;
+      return (clientX - rect.left) * escala;
+    };
+    caja.addEventListener('pointerdown', e => {
+      const g = e.target.closest('.handle9');
+      if(!g) return;
+      arrastrando = Number(g.dataset.idx);
+      try{ caja.setPointerCapture(e.pointerId); }catch(_){}
+      e.preventDefault();
+    });
+    caja.addEventListener('pointermove', e => {
+      if(arrastrando < 0) return;
+      const x = getSVGx(e.clientX);
+      const v = xToVal(x);
+      handles[arrastrando].val = Math.max(ejeMin, Math.min(ejeMax, v));
+      redibujar();
+    });
+    const soltar = e => {
+      if(arrastrando >= 0){
+        arrastrando = -1;
+        try{ caja.releasePointerCapture(e.pointerId); }catch(_){}
+      }
+    };
+    caja.addEventListener('pointerup', soltar);
+    caja.addEventListener('pointercancel', soltar);
+
+    $('#n9Comprobar').onclick = () => {
+      if(bloqueado) return;
+      let todosOk = true;
+      handles.forEach(h => {
+        const ok = casi(h.val, d[h.key]);
+        const vb = cont.querySelector(`.valor-barra[data-idx="${h.key}"]`);
+        if(ok){ vb.classList.add('bien'); vb.classList.remove('mal'); }
+        else { vb.classList.add('mal'); vb.classList.remove('bien'); todosOk = false; }
+      });
+      if(todosOk){
+        sonidos.fase();
+        bloqueado = true;
+        setTimeout(() => completarNivel(9, segundosActuales, erroresNivel), 700);
+      } else {
+        sonidos.error(); sumarError();
+        toast('❌ Algunos marcadores no están en la posición correcta.');
+      }
+    };
+    $('#n9Limpiar').onclick = () => {
+      handles.forEach(h => h.val = ejeMin);
+      redibujar();
+      cont.querySelectorAll('.valor-barra').forEach(v => v.classList.remove('bien','mal'));
+    };
+    $('#btnAyuda').onclick = () => {
+      const idx = handles.findIndex(h => !casi(h.val, d[h.key]));
+      if(idx < 0){ toast('Todos correctos.'); return; }
+      handles[idx].val = d[handles[idx].key];
+      redibujar();
+      const vb = cont.querySelector(`.valor-barra[data-idx="${handles[idx].key}"]`);
+      if(vb) vb.classList.add('bien');
+      sumarError();
+      toast(`💡 Ayuda usada: se ubicó ${handles[idx].label}.`);
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Ubicar el boxplot completo. ¿Continuar?')) return;
+      bloqueado = true;
+      handles.forEach(h => { h.val = d[h.key]; });
+      redibujar();
+      cont.querySelectorAll('.valor-barra').forEach(v => v.classList.add('bien'));
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(9, segundosActuales, 99), 900);
+    };
+    actualizarValores();
+  }
+};
+
+/* =========================================================
+   ====================   NIVEL 10   =======================
+   Problemas de razonamiento
+   ========================================================= */
+const Nivel10 = {
+  generarFaltante(rng){
+    const n = 5;
+    const promedio = 4 + Math.floor(rng() * 5);   // 4 a 8
+    const sumaTotal = promedio * n;
+    let otros, faltante, intentos = 0;
+    do {
+      otros = [];
+      let sumaOtros = 0;
+      for(let i = 0; i < n - 1; i++){
+        const v = 1 + Math.floor(rng() * 9);
+        otros.push(v);
+        sumaOtros += v;
+      }
+      faltante = sumaTotal - sumaOtros;
+      intentos++;
+    } while((faltante < 1 || faltante > 9) && intentos < 300);
+
+    const completo = [...otros];
+    const posFaltante = Math.floor(rng() * n);
+    completo.splice(posFaltante, 0, faltante);
+
+    const mostrados = completo.map((v,i) => i === posFaltante ? null : v);
+    return {
+      tipo: 'faltante',
+      datos: mostrados,
+      promedio, faltante, n,
+      enunciado: `Se tiene un conjunto de <b>${n}</b> datos, pero <b>falta uno</b>. Sabiendo que el <b>promedio aritmético es ${promedio}</b>, ¿cuál es el valor faltante?`
+    };
+  },
+  generarMediana(rng){
+    const n = rng() < 0.5 ? 5 : 7;
+    const datos = [];
+    for(let i = 0; i < n; i++) datos.push(2 + Math.floor(rng() * 15));
+    datos.sort((a,b) => a-b);
+    const nuevo = 2 + Math.floor(rng() * 15);
+
+    const conjuntoNuevo = [...datos, nuevo].sort((a,b) => a-b);
+    const nn = conjuntoNuevo.length;
+    const nuevaMediana = nn % 2 === 0
+      ? (conjuntoNuevo[nn/2 - 1] + conjuntoNuevo[nn/2]) / 2
+      : conjuntoNuevo[Math.floor(nn/2)];
+    const medianaOriginal = datos[Math.floor(n/2)];
+    const cambia = Math.abs(nuevaMediana - medianaOriginal) > 0.001;
+
+    return {
+      tipo: 'mediana',
+      datos, nuevo, nuevaMediana, medianaOriginal, cambia,
+      enunciado: `Se tiene el conjunto ordenado <b>{${datos.join(', ')}}</b>. Si se agrega el valor <b>${nuevo}</b>, ¿cuál es el <b>nuevo valor de la mediana</b>?`
+    };
+  },
+  generar(){
+    const rng = mulberry32(seedFor(10));
+    const problemas = [
+      this.generarFaltante(rng),
+      this.generarFaltante(rng),
+      this.generarMediana(rng),
+      this.generarMediana(rng)
+    ];
+    return { problemas };
+  },
+
+  montar(cont){
+    const d = this.generar();
+    const problemas = d.problemas;
+    let faseActual = 0, bloqueado = false;
+
+    const bloquesFaltante = problemas.slice(0, 2).map((p, i) => `
+      <div class="problema-card" data-problema="${i}">
+        <h4>🧩 Problema ${i+1} · Valor faltante</h4>
+        <div class="enunciado">${p.enunciado}</div>
+        <div class="datos-problema">
+          ${p.datos.map(v => v === null
+            ? `<span class="chip falta">?</span>`
+            : `<span class="chip">${v}</span>`).join('')}
+        </div>
+        <div class="faltante-input">
+          <span style="font-weight:700">Valor faltante:</span>
+          <input type="text" inputmode="decimal" data-tipo="faltante" data-idx="${i}">
+          <span class="marca"></span>
+        </div>
+      </div>`).join('');
+
+    const bloquesMediana = problemas.slice(2).map((p, i) => `
+      <div class="problema-card" data-problema="${i+2}">
+        <h4>🧠 Problema ${i+3} · Efecto sobre la mediana</h4>
+        <div class="enunciado">${p.enunciado}</div>
+        <div class="datos-problema">
+          ${p.datos.map(v => `<span class="chip">${v}</span>`).join('')}
+          <span class="chip" style="background:#fef3c7; color:#92400e; border-color:#fcd34d">+ ${p.nuevo}</span>
+        </div>
+        <div class="faltante-input">
+          <span style="font-weight:700">Nueva mediana:</span>
+          <input type="text" inputmode="decimal" data-tipo="mediana" data-idx="${i}">
+          <span class="marca"></span>
+        </div>
+      </div>`).join('');
+
+    cont.innerHTML = `
+      <div class="mision">
+        <div class="mision-icono">🧩</div>
+        <div class="mision-texto">
+          <h3>Nivel 10 · Problemas de razonamiento</h3>
+          <p><b>Fase 1:</b> encuentra el <b>valor faltante</b> de un conjunto cuando conoces el promedio.<br>
+             <b>Fase 2:</b> determina si la <b>mediana cambia</b> al agregar un dato y cuál es el <b>nuevo valor</b>.</p>
+        </div>
+      </div>
+      <div class="nivel-layout">
+        <aside>
+          <div class="card">
+            <h3>🎯 Avance</h3>
+            <div class="fases">
+              <div class="fase-pill activa" id="n10PillF">
+                <span class="ico">▶</span><span>Valor faltante</span>
+              </div>
+              <div class="fase-pill" id="n10PillM">
+                <span class="ico">🔒</span><span>Efecto en la mediana</span>
+              </div>
+            </div>
+          </div>
+          <details class="card">
+            <summary>📐 Recordatorio</summary>
+            <ul class="formulas">
+              <li><b>Promedio</b> = suma ÷ n → <b>Suma = promedio × n</b>.</li>
+              <li>Resta la suma de los datos conocidos para obtener el faltante.</li>
+              <li>Al agregar un dato, recalcula la mediana con el <b>nuevo n</b>.</li>
+              <li>Si el n pasa de impar a par, promedia los dos centrales.</li>
+            </ul>
+          </details>
+        </aside>
+        <section>
+          <div class="card">
+            <h3>✍️ Fase 1 · Encuentra el valor faltante</h3>
+            <p class="ayuda">Usa la relación <b>suma = promedio × n</b>. El resultado es un número entero.</p>
+            ${bloquesFaltante}
+          </div>
+          <div class="card">
+            <h3>🧠 Fase 2 · Efecto sobre la mediana</h3>
+            <p class="ayuda">Calcula la nueva mediana <b>después de agregar el dato</b>. Observa si cambia respecto a la original.</p>
+            ${bloquesMediana}
+          </div>
+        </section>
+      </div>`;
+
+    const inputs = $$('input[data-tipo]');
+
+    const actualizarPills = () => {
+      const okF = $$('input[data-tipo="faltante"]').every(i => i.dataset.ok === '1');
+      const okM = $$('input[data-tipo="mediana"]').every(i => i.dataset.ok === '1');
+      const pillF = $('#n10PillF'), pillM = $('#n10PillM');
+      pillF.className = 'fase-pill ' + (okF ? 'hecha' : 'activa');
+      pillF.querySelector('.ico').textContent = okF ? '✔' : '▶';
+      if(okF){
+        pillM.className = 'fase-pill ' + (okM ? 'hecha' : 'activa');
+        pillM.querySelector('.ico').textContent = okM ? '✔' : '▶';
+      } else {
+        pillM.className = 'fase-pill';
+        pillM.querySelector('.ico').textContent = '🔒';
+      }
+    };
+
+    const validar = (inp, silencioso) => {
+      if(bloqueado || inp.readOnly) return;
+      const tipo = inp.dataset.tipo;
+      const idx  = Number(inp.dataset.idx);
+      const marca = inp.parentElement.querySelector('.marca');
+      const bruto = inp.value.trim();
+      if(bruto === ''){ marca.textContent=''; marca.className='marca'; inp.classList.remove('mal'); return; }
+
+      let correcto;
+      if(tipo === 'faltante'){
+        correcto = problemas[idx].faltante;
+      } else {
+        correcto = problemas[idx + 2].nuevaMediana;
+      }
+      const v = parseNum(bruto);
+
+      if(Number.isFinite(v) && Math.abs(v - correcto) < 0.005){
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        marca.textContent = '✔'; marca.className = 'marca ok';
+        if(!silencioso) sonidos.correcto();
+
+        // Retroalimentación especial para los problemas de mediana
+        if(tipo === 'mediana'){
+          const p = problemas[idx + 2];
+          const card = inp.closest('.problema-card');
+          if(!card.querySelector('.feedback-ok')){
+            const div = document.createElement('div');
+            div.className = 'feedback-ok';
+            div.innerHTML = p.cambia
+              ? `🔁 La mediana <b>cambió</b>: pasó de <b>${p.medianaOriginal}</b> a <b>${p.nuevaMediana}</b>, porque al agregar el dato el conjunto pasó de ${p.datos.length} a ${p.datos.length + 1} elementos.`
+              : `✅ La mediana <b>no cambió</b>: sigue siendo <b>${p.medianaOriginal}</b>, aunque el conjunto ahora tiene ${p.datos.length + 1} elementos.`;
+            card.appendChild(div);
+          }
+        }
+        revisar();
+      } else {
+        inp.classList.remove('bien'); inp.classList.add('mal');
+        marca.textContent = '✖'; marca.className = 'marca error';
+        inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+        if(!silencioso){ sonidos.error(); sumarError(); }
+      }
+    };
+
+    const revisar = () => {
+      actualizarPills();
+      const total = inputs.length;
+      const ok = inputs.filter(i => i.dataset.ok === '1').length;
+      if(ok === total && !bloqueado){
+        bloqueado = true;
+        setTimeout(() => completarNivel(10, segundosActuales, erroresNivel), 800);
+      }
+    };
+
+    inputs.forEach(inp => {
+      inp.addEventListener('keydown', e => {
+        if(e.key === 'Enter'){ e.preventDefault(); validar(inp); }
+      });
+      inp.addEventListener('focusout', () => validar(inp));
+      inp.addEventListener('input', () => {
+        if(inp.readOnly) return;
+        inp.classList.remove('mal');
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = ''; m.className = 'marca';
+      });
+    });
+
+    $('#btnAyuda').onclick = () => {
+      const inp = inputs.find(i => !i.readOnly);
+      if(!inp){ toast('Todo correcto.'); return; }
+      const tipo = inp.dataset.tipo, idx = Number(inp.dataset.idx);
+      inp.value = tipo === 'faltante' ? problemas[idx].faltante : problemas[idx + 2].nuevaMediana;
+      validar(inp, true); sumarError();
+      toast('💡 Ayuda usada.');
+    };
+    $('#btnProfesor').onclick = () => {
+      if(!confirm('Revelar solución completa. ¿Continuar?')) return;
+      bloqueado = true;
+      inputs.forEach(inp => {
+        const tipo = inp.dataset.tipo, idx = Number(inp.dataset.idx);
+        inp.value = tipo === 'faltante' ? problemas[idx].faltante : problemas[idx + 2].nuevaMediana;
+        inp.classList.remove('mal'); inp.classList.add('bien');
+        inp.readOnly = true; inp.dataset.ok = '1';
+        const m = inp.parentElement.querySelector('.marca');
+        m.textContent = '✔'; m.className = 'marca ok';
+      });
+      actualizarPills();
+      toast('👨‍🏫 Solución revelada.');
+      setTimeout(() => completarNivel(10, segundosActuales, 99), 900);
+    };
+    actualizarPills();
+  }
+};
+
+/* =========================================================
+   ==================== PANEL DOCENTE ======================
+   ========================================================= */
+function renderDocente(){
+  let regs = [];
+  try{ regs = JSON.parse(localStorage.getItem(REGISTROS_KEY)) || []; }catch(e){}
+
+  $('#docTotalEst').innerHTML = `📋 <b>${regs.length}</b> registro${regs.length !== 1 ? 's' : ''}`;
+
+  const cont = $('#docTablaCont');
+  if(regs.length === 0){
+    cont.innerHTML = '<div class="sin-registros">Aún no hay estudiantes registrados. Los puntajes se guardan al completar niveles o al importar códigos.</div>';
+  } else {
+    regs.sort((a,b) => (b.puntaje || 0) - (a.puntaje || 0));
+    const filas = regs.map((r, i) => {
+      const nivs = r.niveles || {};
+      const completados = Object.values(nivs).filter(n => n && n.completado).length;
+      const totalEst = Object.values(nivs).reduce((s,n) => s + ((n && n.estrellas) || 0), 0);
+      const fecha = r.actualizado
+        ? new Date(r.actualizado).toLocaleString('es-CL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+        : '—';
+      return `
+        <tr>
+          <td><b>${r.nombre || '—'}</b><br><small style="color:var(--texto-suave)">semilla: ${r.semilla ?? '—'}</small></td>
+          <td>${completados}/10</td>
+          <td>⭐ ${totalEst}/30</td>
+          <td><b>${r.puntaje || 0}</b></td>
+          <td><small>${fecha}</small></td>
+          <td>
+            <div class="acciones">
+              <button class="mini-btn" data-ver="${i}">Ver</button>
+              <button class="mini-btn peligro" data-del="${r.id}">✕</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+    cont.innerHTML = `
+      <div style="overflow:auto">
+        <table class="docente-tabla">
+          <thead><tr><th>Estudiante</th><th>Niveles</th><th>Estrellas</th><th>Puntaje</th><th>Actualizado</th><th></th></tr></thead>
+          <tbody>${filas}</tbody>
+        </table>
+      </div>`;
+
+    cont.querySelectorAll('[data-ver]').forEach(btn => {
+      btn.onclick = () => verDetalleEstudiante(regs[Number(btn.dataset.ver)]);
+    });
+    cont.querySelectorAll('[data-del]').forEach(btn => {
+      btn.onclick = () => {
+        if(!confirm('¿Eliminar este registro?')) return;
+        regs = regs.filter(x => x.id !== btn.dataset.del);
+        localStorage.setItem(REGISTROS_KEY, JSON.stringify(regs));
+        renderDocente();
+      };
+    });
+  }
+
+  $('#docNiveles').innerHTML = NIVELES_INFO.map(n => `
+    <button class="docente-nivel-btn" data-nivel="${n.id}">
+      <span class="num">${n.id}</span>
+      <span class="txt">${n.titulo}</span>
+    </button>`).join('');
+  $('#docNiveles').querySelectorAll('[data-nivel]').forEach(btn => {
+    btn.onclick = () => iniciarNivel(Number(btn.dataset.nivel));
+  });
+}
+
+function verDetalleEstudiante(reg){
+  const nivs = reg.niveles || {};
+  const filas = NIVELES_INFO.map(n => {
+    const e = nivs[n.id] || {};
+    const est = e.estrellas || 0;
+    const estrellasHTML = est > 0 ? '⭐'.repeat(est) + '☆'.repeat(3 - est) : '—';
+    return `
+      <tr>
+        <td>${n.id}</td>
+        <td>${n.titulo}</td>
+        <td>${e.completado ? '<span style="color:var(--ok); font-weight:900">✔</span>' : '—'}</td>
+        <td>${estrellasHTML}</td>
+        <td>${e.errores !== undefined ? e.errores : '—'}</td>
+        <td>${e.tiempo ? fmtTiempo(e.tiempo) : '—'}</td>
+      </tr>`;
+  }).join('');
+
+  $('#modalContenido').innerHTML = `
+    <div class="modal-emoji">👤</div>
+    <h2>${reg.nombre}</h2>
+    <p>Semilla: <b>${reg.semilla}</b> · Puntaje: <b>${reg.puntaje} pts</b></p>
+    <div style="max-height:360px; overflow:auto; margin-bottom:20px; text-align:left">
+      <table class="docente-tabla" style="min-width:0">
+        <thead><tr><th>N°</th><th>Nivel</th><th>✔</th><th>Estrellas</th><th>Err.</th><th>Tiempo</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+    <div class="modal-botones">
+      <button class="btn" id="mdCerrar">Cerrar</button>
+    </div>`;
+  $('#modalContenido').classList.add('grande');
+  $('#overlay').classList.add('visible');
+  $('#mdCerrar').onclick = () => cerrarModal();
+}
+
+/* =========================================================
+   ====================   EVENTOS GLOBALES   ===============
+   ========================================================= */
+
+$('#btnComenzar').onclick = () => {
+  const nombre = $('#inputNombre').value.trim() || 'estudiante';
+  const semillaTxt = $('#inputSemilla').value.trim();
+  let semilla;
+  if(semillaTxt === ''){
+    semilla = Math.floor(Math.random() * 999999);
+  } else if(/^\d+$/.test(semillaTxt)){
+    semilla = parseInt(semillaTxt, 10);
+  } else {
+    let h = 0;
+    for(let i = 0; i < semillaTxt.length; i++) h = (h * 31 + semillaTxt.charCodeAt(i)) | 0;
+    semilla = Math.abs(h);
+  }
+  app.nombre = nombre;
+  app.semilla = semilla;
+  app.puntajeTotal = 0;
+  [1,2,3,4,5,6,7,8,9,10].forEach(i => { app.niveles[i] = { completado:false, estrellas:0, errores:0, tiempo:0 }; });
+  guardar();
+  actualizarHeader();
+  ctxA();
+  renderMapa();
+  irA('pantalla-mapa');
+  toast(`¡Bienvenido/a, <b>${nombre}</b>! Semilla: <b>${semilla}</b>`);
+};
+
+$('#btnContinuar').onclick = () => {
+  if(!app.nombre){ toast('No hay partida guardada.'); return; }
+  actualizarHeader();
+  renderMapa();
+  irA('pantalla-mapa');
+};
+$('#btnVolverMapa').onclick = () => { detenerTimer(); renderMapa(); irA('pantalla-mapa'); };
+$('#btnInicio').onclick = () => { detenerTimer(); irA('pantalla-inicio'); };
+
+$('#btnOscuro').onclick = () => {
+  app.modoOscuro = !app.modoOscuro;
+  document.body.classList.toggle('oscuro', app.modoOscuro);
+  $('#btnOscuro').textContent = app.modoOscuro ? '☀️' : '🌙';
+  guardar();
+};
+$('#btnSonido').onclick = () => {
+  app.sonidoActivo = !app.sonidoActivo;
+  $('#btnSonido').textContent = app.sonidoActivo ? '🔊' : '🔇';
+  guardar();
+  if(app.sonidoActivo) sonidos.click();
+};
+
+$('#btnVerMapa').onclick = () => { renderMapa(); irA('pantalla-mapa'); };
+$('#btnReiniciarTodo').onclick = () => {
+  if(!confirm('¿Reiniciar todo el progreso? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  app.nombre = '';
+  app.puntajeTotal = 0;
+  [1,2,3,4,5,6,7,8,9,10].forEach(i => { app.niveles[i] = { completado:false, estrellas:0, errores:0, tiempo:0 }; });
+  actualizarHeader();
+  $('#inputNombre').value = '';
+  $('#inputSemilla').value = '';
+  $('#btnContinuar').style.display = 'none';
+  irA('pantalla-inicio');
+};
+
+/* ==================== MODO DOCENTE ==================== */
+$('#btnDocente').onclick = () => {
+  if(app.modoDocente){
+    renderDocente();
+    irA('pantalla-docente');
+    return;
+  }
+  const pass = prompt('Contraseña de docente:');
+  if(pass === null) return;
+  if(pass !== DOCENTE_PASS){ toast('❌ Contraseña incorrecta.'); return; }
+  app.modoDocente = true;
+  app.backupEstudiante = {
+    puntajeTotal: app.puntajeTotal,
+    niveles: JSON.parse(JSON.stringify(app.niveles))
+  };
+  $('#btnDocente').classList.add('activo');
+  guardar();
+  toast('👨‍🏫 Modo docente activado.');
+  renderDocente();
+  irA('pantalla-docente');
+};
+
+$('#btnSalirDocente').onclick = () => {
+  if(app.backupEstudiante){
+    app.puntajeTotal = app.backupEstudiante.puntajeTotal;
+    app.niveles = app.backupEstudiante.niveles;
+    app.backupEstudiante = null;
+  }
+  app.modoDocente = false;
+  $('#btnDocente').classList.remove('activo');
+  guardar();
+  actualizarHeader();
+  renderMapa();
+  irA('pantalla-mapa');
+  toast('Modo docente desactivado.');
+};
+
+$('#btnExportarTodo').onclick = () => {
+  let regs = [];
+  try{ regs = JSON.parse(localStorage.getItem(REGISTROS_KEY)) || []; }catch(e){}
+  if(regs.length === 0){ toast('No hay registros para exportar.'); return; }
+  const data = { generado: new Date().toISOString(), registros: regs };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `estadisticaquest_registros_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast(`📤 Exportados ${regs.length} registros.`);
+};
+
+$('#btnLimpiarRegistros').onclick = () => {
+  if(!confirm('¿Eliminar TODOS los registros de estudiantes? Esta acción no se puede deshacer.')) return;
+  localStorage.setItem(REGISTROS_KEY, '[]');
+  renderDocente();
+  toast('Registros eliminados.');
+};
+
+$('#btnImportar').onclick = () => {
+  const texto = $('#docImportar').value;
+  if(!texto.trim()){ toast('Pega al menos un código.'); return; }
+  const r = importarCodigos(texto);
+  $('#importFeedback').innerHTML = `✅ <b>${r.importados}</b> importados · ❌ <b>${r.errores}</b> con error`;
+  if(r.importados > 0){
+    $('#docImportar').value = '';
+    renderDocente();
+    toast(`📥 ${r.importados} código(s) importado(s).`);
+  }
+};
+
+$('#btnCompartir').onclick = () => {
+  const codigo = generarCodigoEstudiante();
+  if(!codigo){ toast('Primero debes ingresar tu nombre.'); return; }
+  let copiado = false;
+  try{ navigator.clipboard.writeText(codigo); copiado = true; }catch(e){}
+  $('#modalContenido').innerHTML = `
+    <div class="modal-emoji">📤</div>
+    <h2>Comparte tu progreso</h2>
+    <p>${copiado ? '✅ El código se copió al portapapeles.' : ''}<br>
+       Copia este código y envíalo a tu docente:</p>
+    <textarea readonly style="width:100%; min-height:120px; padding:10px; border-radius:10px;
+                              border:2px solid var(--borde); font-family:'Courier New', monospace;
+                              font-size:.72rem; background:var(--input-bg); color:var(--texto);
+                              resize:vertical; margin-bottom:20px">${codigo}</textarea>
+    <div class="modal-botones">
+      <button class="btn" id="mdCopiar">📋 Copiar de nuevo</button>
+      <button class="btn ghost" id="mdCerrar2">Cerrar</button>
+    </div>`;
+  $('#modalContenido').classList.remove('grande');
+  $('#overlay').classList.add('visible');
+  $('#mdCopiar').onclick = () => {
+    try{
+      navigator.clipboard.writeText(codigo);
+      toast('✅ Código copiado.');
+    }catch(e){
+      const ta = document.querySelector('#modalContenido textarea');
+      if(ta){ ta.select(); document.execCommand('copy'); toast('✅ Código copiado.'); }
+    }
+  };
+  $('#mdCerrar2').onclick = () => cerrarModal();
+};
+
+/* ==================== INICIALIZACIÓN ==================== */
+(function init(){
+  if(cargar()){
+    if(app.modoOscuro){
+      document.body.classList.add('oscuro');
+      $('#btnOscuro').textContent = '☀️';
+    }
+    $('#btnSonido').textContent = app.sonidoActivo ? '🔊' : '🔇';
+    if(app.nombre){
+      $('#inputNombre').value = app.nombre;
+      $('#btnContinuar').style.display = 'block';
+    }
+    if(app.modoDocente){
+      app.modoDocente = false;
+      app.backupEstudiante = null;
+      $('#btnDocente').classList.remove('activo');
+    }
+    actualizarHeader();
+  }
+})();
+</script>
+</body>
+</html>
